@@ -1,2 +1,2 @@
-# iCamViewer-Plugin
-iCamViewer BuildFire.js plugin
+# defaultPluginTemplate
+Default simple plugin template 

@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- JS -->
+  <script src="../../../scripts/buildfire.js"></script>
+  <script src="../../../scripts/buildfire/components/popup/popup.js"></script>
+  <script src="../../../scripts/buildfire/components/drawer/drawer.js"></script>
+  <link rel="stylesheet" href="style.css">
+  <link
+  rel="stylesheet"
+  href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css"
+/>
+
+</head>
+<body>
+
+	<div class="container">
+		<div id="addCamView">
+			<div class="header">
+				<button class="cancel" onClick="showCamView()">&#x2715;</button>
+				<span>Configure Camera</span>
+				<button class="save" onClick="addCamera()">&#x2713;</button>
+			</div>
+			<div class="form">
+				<div class="formField"><label for="name">Name:</label><input id="name" placeholder="The name of your camera"></input></div>
+				<div class="formField"><label for="host">Host or IP Address: </label><input id="host" placeholder="ex. 192.168.0.1"></input></div>
+				<div class="formField"><label for="port">Port: </label><input id="Port" placeholder="ex. 8080"></input></div>
+				<div class="formField"><label for="username">Username: </label><input id="username" placeholder="The username to log in to the camera"></input></div>
+				<div class="formField"><label for="password">Password: </label><input id="password" placeholder="The password to log in to the camera" type="password"></input></div>
+				<div class="formField"><label for="vendor">Vendor: </label><select id="vendor" name="vendor">
+									<option value="viewtron">Viewtron</option>
+									<option value="zavio">Zavio</option>
+								</select></div>
+				<div class="formField"><label for="model">Model: </label><select id="model" name="model">
+									<option value="ipcam">IP Camera</option>
+								</select></div>
+				<button style="font-size:medium; width: 100%; padding:10px; border:none; background:none; color:white;">Delete this Camera</button>
+			</div>
+		</div>
+
+
+		<div id="iCamView">
+			<div class="header">
+				<button class="cancel" onClick="showCamView()">&#9881;</button>
+				<span></span>
+				<button class="save" onClick="showAddCamView()">&plus;</button>
+			</div>
+
+			<!-- Slider main container -->
+			<div class="swiper">
+				<!-- Additional required wrapper -->
+				<div class="swiper-wrapper">
+					<!-- Slides -->
+					<!-- <div class="swiper-slide"><img src="images/image.png"><span>Camera 1</span></div>
+					<div class="swiper-slide"><img src="images/image.png"><span>Camera 2</span></div>
+					<div class="swiper-slide"><img src="images/image.png"><span>Camera 3</span></div> -->
+				</div>
+				<!-- If we need pagination -->
+				<div class="swiper-pagination"></div>
+			
+				<!-- If we need navigation buttons -->
+				<div class="swiper-button-prev"></div>
+				<div class="swiper-button-next"></div>
+			
+				<!-- If we need scrollbar -->
+				<!-- <div class="swiper-scrollbar"></div> -->
+			</div>
+
+			<button onClick="deleteAllCams()">DELETE ALL CAM DATA</button>
+				<script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+		</div>
+	</div>
+
+<script>
+
+	// Get the button that opens the modal
+	var btn = document.getElementById("myBtn");
+
+	// Container for the iCamViewer.
+	var iCamView = document.getElementById("iCamView");
+
+	// Container for the Add Cam screen.
+	var addCam = document.getElementById("addCamView");
+
+	var addCamBtn = document.getElementById("addCamBtn");
+
+	function hideAllViews()
+	{
+		iCamView.style.display = "none";
+		addCamView.style.display ="none";
+	}
+
+	function showCamView()
+	{
+		hideAllViews();
+		iCamView.style.display = "block";
+	}
+
+	function hideCamView()
+	{
+		iCamView.style.display = "none";
+	}
+
+	function showAddCamView()
+	{
+		hideAllViews();
+		addCamView.style.display ="block";
+	}
+
+	function hideAddCamView()
+	{
+		addCamView.style.display ="none";
+	}
+
+	function returnHome()
+	{
+		buildfire.navigation.navigateHome();
+	}
+
+</script>
+
+<script>
+	window.onload = loadCameras();
+
+	const swiper = new Swiper('.swiper', {
+	// Optional parameters
+	direction: 'horizontal',
+	loop: false,
+	allowTouchMove:true,
+	centeredSlides: true,
+	spaceBetween: 5,
+
+	// If we need pagination
+	pagination: {
+		el: '.swiper-pagination',
+	},
+
+	// // Navigation arrows
+	navigation: {
+		nextEl: '.swiper-button-next',
+		prevEl: '.swiper-button-prev',
+	},
+
+	// And if we need scrollbar
+	// scrollbar: {
+	// 	el: '.swiper-scrollbar',
+	// },
+	});
+
+	function addCamera(camName)
+	{
+		let camList = { cams: []};
+
+		//  swiper.appendSlide([
+		// '<div class="swiper-slide"><img src="images/image.png"><span>'+ document.getElementsByClassName('formField')[0].getElementsByTagName('input')[0].value + '</span></div>',
+		// ]);
+
+		buildfire.userData.insert(
+		{ 
+			name: document.getElementsByClassName('formField')[0].getElementsByTagName('input')[0].value, 
+			host: document.getElementsByClassName('formField')[1].getElementsByTagName('input')[0].value, 
+			port: document.getElementsByClassName('formField')[2].getElementsByTagName('input')[0].value, 
+			username: document.getElementsByClassName('formField')[3].getElementsByTagName('input')[0].value, 
+			password: document.getElementsByClassName('formField')[4].getElementsByTagName('input')[0].value, 
+			vendor: document.getElementsByClassName('formField')[5].getElementsByTagName('select')[0].value, 
+			model: document.getElementsByClassName('formField')[6].getElementsByTagName('select')[0].value, 
+		},
+			"camInfo",
+			false,
+		(err, result) => {
+			if (err) return console.error("Error while inserting your data", err);
+
+			console.log("Insert successful", result);
+			loadCameras();
+
+			showCamView();
+
+			clearForm();
+		}
+		);
+
+
+	}
+
+	function loadCameras()
+	{
+		document.getElementsByClassName('swiper-wrapper')[0].innerHTML = "";
+
+		buildfire.userData.search(
+		{
+			filter: {
+
+			},
+			limit: 20,
+		},
+		"camInfo",
+		(err, result) => {
+			if (err) return console.error("there was a problem retrieving your data");
+
+			for(let i = 0; i < result.length; i++)
+			{
+				swiper.appendSlide([
+				'<div class="swiper-slide"><img src="images/image.png"><span>'+ result[i]["data"].name + '</span></div>',
+				]);		
+			}
+
+		}
+		);
+	}
+
+	function save(callback)
+	{
+		buildfire.datastore.save(camList, "taskListCol", callback);
+	}
+
+	function addCamToList()
+	{
+
+	}
+
+	function ui(elementType, appendTo, innerHTML, classNameArray)
+	{
+		let e = document.createElement(elementType);
+		if(innerHTML) e.innterHTML = innterHTML;
+		if(Array.isArray(classNameArray)) classNameArray.forEach(c=>e.classList.add(c));
+		if(appendTo) appendTo.appendChild(e);
+		return e;
+	}
+
+	function deleteAllCams()
+	{
+		document.getElementsByClassName('swiper-wrapper')[0].innerHTML = "";
+
+		buildfire.userData.search(
+		{
+			filter: {},
+			limit: 20,
+		},
+		"camInfo",
+		(err, result) => {
+			if (err) return console.error("there was a problem retrieving your data");
+
+			for(let i = 0; i < result.length; i++)
+			{
+				buildfire.userData.delete(result[i].id, "camInfo", (err, result) => {
+				if (err) return console.error(err);
+
+				console.log("Record deleted");
+				});
+			}
+		}
+		);
+	}
+
+	function clearForm()
+	{
+		for(var i = 0; i < document.getElementsByClassName('formField').length; i++)
+		{
+			document.getElementsByClassName('formField')[i].getElementsByTagName('input')[0].value = "";
+		}
+	}
+
+
+
+</script>
+
+</body>
+</html>

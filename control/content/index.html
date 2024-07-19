@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- JS -->
+    <script src="../../../../scripts/buildfire.js"></script>
+
+    <style>
+
+        ul{
+            margin-bottom: 1em;
+        }
+
+        li{
+            padding:.5em;
+            margin-top: 5px;
+            border-left: greenyellow 5px solid;
+            background-color: #fcfcfc;
+        }
+
+        .delButton{
+            float: right;
+            background-color: transparent;
+            border:none;
+        }
+        .delButton:hover{
+            color:red;
+        }
+
+        #txtNewTask{
+            width: 80%;
+        }
+
+    </style>
+
+</head>
+<body>
+<ul id="ulTasks"></ul>
+    <span>New Task</span>
+    <input type="text" id="txtNewTask" placeholder="enter the new task name here">
+    <button onclick="addTask()" class="btn btn-success">Add</button>
+
+    <script>
+
+        let taskList={
+			tasks:[]
+        };
+
+        function addTask(){
+        	taskList.tasks.push(txtNewTask.value);
+
+        	save(err=>{
+        		if(err)
+        			return console.error(err);
+        		else {
+					addTaskToList(txtNewTask.value);
+					txtNewTask.value='';
+				}
+            });
+        }
+
+        function save(callback){
+			buildfire.datastore.save(taskList,"taskListCol",callback);
+        }
+
+        function load() {
+			buildfire.datastore.get("taskListCol", (err, response) => {
+
+				if (err) return console.error(err);
+
+				if (response && response.data && response.data.tasks) {
+					taskList = response.data;
+					ulTasks.innerHTML='';
+
+					if(taskList && taskList.tasks && taskList.tasks.length){
+						taskList.tasks.forEach(addTaskToList);
+					}
+				}
+			});
+		}
+
+        function addTaskToList(taskName){
+			let li = ui('li',ulTasks,taskName);
+			let delBtn = ui('button',li,'X',['delButton']);
+			delBtn.onclick=()=>{
+
+				let i = taskList.tasks.findIndex(t=>t==taskName);
+				if(i>=0) {
+					taskList.tasks.splice(i, 1);
+					save();
+					ulTasks.removeChild(li);
+				}
+
+            };
+        }
+
+        function ui(elementType,appendTo,innerHTML,classNameArray){
+			let e = document.createElement(elementType);
+			if(innerHTML) e.innerHTML = innerHTML;
+			if(Array.isArray(classNameArray))
+				classNameArray.forEach(c=>e.classList.add(c));
+			if(appendTo) appendTo.appendChild(e);
+			return e;
+		}
+
+		load();
+
+		function registerEvents() {
+			buildfire.analytics.registerEvent({
+				title: "Task Completed",
+				key: "TASK_COMPLETED",
+				description: "Occurs when a user marks a task as complete"
+			}, {silentNotification: false});
+		}
+		registerEvents();
+
+    </script>
+    
+    </body>
+</html>

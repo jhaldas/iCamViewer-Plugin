@@ -1,0 +1,22 @@
+{
+  "author": "Jonathan Haldas",
+  "pluginName": "iCamViewer",
+  "pluginDescription": "This is a demo on how to create a task manager.",
+  "supportEmail": "jonathan.haldas@gmail.com",
+  "control": {
+    "content": {
+      "enabled": true
+    },
+    "design":{
+      "enabled": false
+    },
+    "settings": {
+      "enabled": false
+    }
+  },
+  "widget": {
+
+  },
+  "features": [],
+  "languages": ["en"]
+}
