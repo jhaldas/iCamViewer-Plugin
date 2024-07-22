@@ -75,7 +75,6 @@
 	</div>
 
 <script>
-
 	// Get the button that opens the modal
 	var btn = document.getElementById("myBtn");
 
@@ -86,6 +85,8 @@
 	var addCam = document.getElementById("addCamView");
 
 	var addCamBtn = document.getElementById("addCamBtn");
+
+
 
 	function hideAllViews()
 	{
@@ -123,7 +124,16 @@
 </script>
 
 <script>
+
+	// A dictionary of all vendors and models that each vendor has
+	vendorModelDict = 
+	{
+		"Test Vendor" : ["Test Model"],
+	}
+
 	window.onload = loadCameras();
+
+	window.onload = parseVendorData();
 
 	const swiper = new Swiper('.swiper', {
 	// Optional parameters
@@ -149,6 +159,19 @@
 	// 	el: '.swiper-scrollbar',
 	// },
 	});
+
+	async function parseVendorData()
+	{
+
+		const response = await fetch('./data/cctv-icamviewer-configs.json');
+		const json = await response.json();
+		console.log(json);
+
+		// for(let i = 0; i < obj.count; i++)
+		// {
+		// 	console.log(obj[i].vendor);
+		// }
+	}
 
 	function addCamera(camName)
 	{
@@ -262,8 +285,6 @@
 			document.getElementsByClassName('formField')[i].getElementsByTagName('input')[0].value = "";
 		}
 	}
-
-
 
 </script>
 
