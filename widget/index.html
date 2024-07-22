@@ -172,33 +172,21 @@
 			false,
 		(err, result) => {
 			if (err) return console.error("Error while inserting your data", err);
-
-			console.log("Insert successful", result);
-
-			loadCameras();
-
-			showCamView();
-
-			console.log("Num slides ");
-
-			console.log(swiper.slides);
-
-			//clearForm();
-			swiper.slideTo(swiper.slides.length - 1);
-		}
-		);
-
-
+			
+			loadCameras(swiper.slides.length);
+		});
 	}
 
-	async function loadCameras()
+	function loadCameras(indexToShow)
 	{
+
+		indexToShow = typeof indexToShow !== "undefined" ? indexToShow : 0;
+
 		document.getElementsByClassName('swiper-wrapper')[0].innerHTML = "";
 
 		buildfire.userData.search(
 		{
 			filter: {
-
 			},
 			limit: 20,
 		},
@@ -212,7 +200,8 @@
 				'<div class="swiper-slide"><img src="images/image.png"><span>'+ result[i]["data"].name + '</span></div>',
 				]);		
 			}
-
+			showCamView();
+			swiper.slideTo(indexToShow);
 		}
 		);
 	}
