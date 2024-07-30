@@ -51,7 +51,6 @@
 				{
 					if(key == $(this).val())
 					{
-						console.log(key, result[key]);
 						var temp = "";
 						for(var i = 0; i < result[key].length; i++)
 						{
@@ -248,7 +247,6 @@
 
 	function loadCameras(indexToShow)
 	{
-
 		indexToShow = typeof indexToShow !== "undefined" ? indexToShow : 0;
 
 		document.getElementsByClassName('swiper-wrapper')[0].innerHTML = "";
@@ -268,6 +266,13 @@
 				swiper.appendSlide([
 				'<div class="swiper-slide"><img src="images/image.png"><span>'+ result[i]["data"].name + '</span></div>',
 				]);		
+			}
+
+			if(result.length <= 0)
+			{
+				swiper.appendSlide([
+				'<div class="swiper-slide"><img width="400" height="400" src="images/Solid_black.png"><span>No Cameras Found</span></div>',
+				]);	
 			}
 			showCamView();
 			swiper.slideTo(indexToShow);
@@ -317,11 +322,12 @@
 				buildfire.userData.delete(result[i].id, "camInfo", (err, result) => {
 				if (err) return console.error(err);
 
-				console.log("Record deleted");
+				loadCameras();
 				});
 			}
 		}
 		);
+
 	}
 
 	function clearForm()
