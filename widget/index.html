@@ -13,9 +13,64 @@
   href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css"
 />
 
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+<script>
+
+	async function parseVendorData()
+	{
+		const response = await fetch('https://ab.azureedge.net/feed/getfeed?name=DM_cctv-camera-configs-v3&version=803');
+		const json = await response.json();
+
+		var ret = {}
+
+		for(let i = 0; i < json.length; i++) {
+			let obj = json[i];
+
+			//console.log(obj.vendor, obj.model);
+
+			if(ret[obj.vendor] == undefined)
+			{
+				ret[obj.vendor] = [];
+			}
+			ret[obj.vendor].push(obj.model);
+		}
+
+		//console.log(stringify(ret));
+
+		return ret;
+	}
+
+	// A dictionary of all vendors and models that each vendor has
+	var dict = parseVendorData();
+	dict.then(function(result)
+	{
+		//console.log(result);
+	})
+
+	//console.log(parseVendorData());
+
+	$(document).ready(function () {
+		$("#vendors").change(function () {
+			switch($(this).val()) {
+				case 'vendor1':
+					$("#models").html("<option value='test'>item1: test 1</option><option value='test2'>item1: test 2</option>");
+					break;
+				case 'vendor2':
+					$("#models").html("<option value='test'>item2: test 1</option><option value='test2'>item2: test 2</option>");
+					break;
+				case 'vendor3':
+					$("#models").html("<option value='test'>item3: test 1</option><option value='test2'>item3: test 2</option>");
+					break;
+				default:
+					$("#models").html("<option value=''>--select one--</option>");
+			}
+		});
+	});
+
+</script>
+
 </head>
 <body>
-
 	<div class="container">
 		<div id="addCamView">
 			<div class="header">
@@ -29,13 +84,32 @@
 				<div class="formField"><label for="port">Port: </label><input id="Port" placeholder="ex. 8080"></input></div>
 				<div class="formField"><label for="username">Username: </label><input id="username" placeholder="The username to log in to the camera"></input></div>
 				<div class="formField"><label for="password">Password: </label><input id="password" placeholder="The password to log in to the camera" type="password"></input></div>
-				<div class="formField"><label for="vendor">Vendor: </label><select id="vendor" name="vendor">
-									<option value="viewtron">Viewtron</option>
-									<option value="zavio">Zavio</option>
-								</select></div>
-				<div class="formField"><label for="model">Model: </label><select id="model" name="model">
-									<option value="ipcam">IP Camera</option>
-								</select></div>
+				<div class="formField"><label for="vendor">Vendor: </label>
+					<select id="vendors">
+						<script>
+							dict.then(function(result)
+							{
+								var node = document.getElementById("vendors");
+								var temp = "";
+								console.log(result);
+								for(var key in result) 
+								{
+									temp += `<option value="`+ key + `">`+ key +`</option>`;
+								}
+								console.log("TEMP: " + temp);
+								node.innerHTML = temp;
+							})
+						</script>
+						<option value="vendor1">item1</option>
+						<option value="vendor2">item2</option>
+						<option value="vendor3">item3</option>
+					</select>
+				</div>
+				<div class="formField"><label for="model">Model: </label>
+						<select id="models">
+							<option value=""> -- select one -- </option>
+						</select>
+				</div>				
 				<button style="font-size:medium; width: 100%; padding:10px; border:none; background:none; color:white;">Delete this Camera</button>
 			</div>
 		</div>
@@ -126,14 +200,14 @@
 <script>
 
 	// A dictionary of all vendors and models that each vendor has
-	vendorModelDict = 
-	{
-		"Test Vendor" : ["Test Model"],
-	}
+	// vendorModelDict = 
+	// {
+	// 	"Test Vendor" : ["Test Model"],
+	// }
 
 	window.onload = loadCameras();
 
-	window.onload = parseVendorData();
+	// window.onload = parseVendorData();
 
 	const swiper = new Swiper('.swiper', {
 	// Optional parameters
@@ -160,29 +234,29 @@
 	// },
 	});
 
-	async function parseVendorData()
-	{
-		const response = await fetch('https://ab.azureedge.net/feed/getfeed?name=DM_cctv-camera-configs-v3&version=803');
-		const json = await response.json();
-		console.log(json);
+	// async function parseVendorData()
+	// {
+	// 	const response = await fetch('https://ab.azureedge.net/feed/getfeed?name=DM_cctv-camera-configs-v3&version=803');
+	// 	const json = await response.json();
+	// 	console.log(json);
 
-		var ret = {}
+	// 	var ret = {}
 
-		for(let i = 0; i < json.length; i++) {
-			let obj = json[i];
+	// 	for(let i = 0; i < json.length; i++) {
+	// 		let obj = json[i];
 
-			console.log(obj.vendor, obj.model);
+	// 		console.log(obj.vendor, obj.model);
 
-			if(ret[obj.vendor] == undefined)
-			{
-				ret[obj.vendor] = [];
-			}
-			ret[obj.vendor].push(obj.model);
-		}
+	// 		if(ret[obj.vendor] == undefined)
+	// 		{
+	// 			ret[obj.vendor] = [];
+	// 		}
+	// 		ret[obj.vendor].push(obj.model);
+	// 	}
 
-		console.log(JSON.stringify(ret));
-		return ret;
-	}
+	// 	console.log(JSON.stringify(ret));
+	// 	return ret;
+	// }
 
 	function addCamera(camName)
 	{
