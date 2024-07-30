@@ -75,6 +75,11 @@
     width:100%;
   }
 
+  .formField label
+  {
+    color: white;
+  }
+
   .formSelect
   {
     display:flex;
@@ -82,6 +87,11 @@
     border-bottom: solid 1px #bbbdbf;
     color:white;
     width:100%;
+  }
+
+  .formSelect label
+  {
+    color:white;
   }
 
   .form input
@@ -123,6 +133,11 @@
     color:white;
     font-size: large;
     display:flex;
+  }
+
+  .header span
+  {
+    color:white;
   }
 
   .header .cancel
