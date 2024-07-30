@@ -66,7 +66,7 @@
     background-color:#3d3e40;
   }
 
-  .formField
+  .addFormField
   {
     display:flex;
     padding: 5px;
@@ -75,12 +75,12 @@
     width:100%;
   }
 
-  .formField label
+  .addFormField label
   {
     color: white;
   }
 
-  .formSelect
+  .addFormSelect
   {
     display:flex;
     padding: 5px;
@@ -89,7 +89,36 @@
     width:100%;
   }
 
-  .formSelect label
+  .addFormSelect label
+  {
+    color:white;
+  }
+
+
+  .editFormField
+  {
+    display:flex;
+    padding: 5px;
+    border-bottom: solid 1px #bbbdbf;
+    color:white;
+    width:100%;
+  }
+
+  .editFormField label
+  {
+    color: white;
+  }
+
+  .editFormSelect
+  {
+    display:flex;
+    padding: 5px;
+    border-bottom: solid 1px #bbbdbf;
+    color:white;
+    width:100%;
+  }
+
+  .editFormSelect label
   {
     color:white;
   }
@@ -115,6 +144,11 @@
   }
 
   #addCamView
+  {
+    display: none;
+  }
+
+  #editCamView
   {
     display: none;
   }

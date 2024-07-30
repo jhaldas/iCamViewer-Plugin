@@ -45,7 +45,7 @@
 	dict.then(function(result)
 	{
 		$(document).ready(function () {
-			$("#vendors").change(function () {
+			$("#vendorsAdd").change(function () {
 
 				for(var key in result)
 				{
@@ -56,7 +56,26 @@
 						{
 							temp += `<option value='`+ result[key][i]+`''>` + result[key][i] + `</option>`;
 						}
-						$("#models").html(temp);
+						$("#modelsAdd").html(temp);
+						return;
+					}
+				}
+			});
+		});
+
+		$(document).ready(function () {
+			$("#vendorsEdit").change(function () {
+
+				for(var key in result)
+				{
+					if(key == $(this).val())
+					{
+						var temp = "";
+						for(var i = 0; i < result[key].length; i++)
+						{
+							temp += `<option value='`+ result[key][i]+`''>` + result[key][i] + `</option>`;
+						}
+						$("#modelsEdit").html(temp);
 						return;
 					}
 				}
@@ -75,17 +94,17 @@
 				<button class="save" onClick="addCamera()">&#x2713;</button>
 			</div>
 			<div class="form">
-				<div class="formField"><label for="name">Name:</label><input id="name" placeholder="The name of your camera"></input></div>
-				<div class="formField"><label for="host">Host or IP Address: </label><input id="host" placeholder="ex. 192.168.0.1"></input></div>
-				<div class="formField"><label for="port">Port: </label><input id="Port" placeholder="ex. 8080"></input></div>
-				<div class="formField"><label for="username">Username: </label><input id="username" placeholder="The username to log in to the camera"></input></div>
-				<div class="formField"><label for="password">Password: </label><input id="password" placeholder="The password to log in to the camera" type="password"></input></div>
-				<div class="formSelect"><label for="vendor">Vendor: </label>
-					<select id="vendors">
+				<div class="addFormField"><label for="nameAdd">Name:</label><input id="nameAdd" placeholder="The name of your camera"></input></div>
+				<div class="addFormField"><label for="hostAdd">Host or IP Address: </label><input id="hostAdd" placeholder="ex. 192.168.0.1"></input></div>
+				<div class="addFormField"><label for="portAdd">Port: </label><input id="portAdd" placeholder="ex. 8080"></input></div>
+				<div class="addFormField"><label for="usernameAdd">Username: </label><input id="usernameAdd" placeholder="The username to log in to the camera"></input></div>
+				<div class="addFormField"><label for="passwordAdd">Password: </label><input id="passwordAdd" placeholder="The password to log in to the camera" type="password"></input></div>
+				<div class="addFormSelect"><label for="vendorsAdd">Vendor: </label>
+					<select id="vendorsAdd">
 						<script>
 							dict.then(function(result)
 							{
-								var node = document.getElementById("vendors");
+								var node = document.getElementById("vendorsAdd");
 								var temp = `<option disabled selected value="select"> -- select one -- </option>`;
 								for(var key in result) 
 								{
@@ -96,8 +115,46 @@
 						</script>
 					</select>
 				</div>
-				<div class="formSelect"><label for="model">Model: </label>
-						<select id="models">
+				<div class="addFormSelect"><label for="modelAdd">Model: </label>
+						<select id="modelsAdd">
+							<option value="select"></option>
+						</select>
+				</div>				
+				<button style="font-size:medium; width: 100%; padding:10px; border:none; background:none; color:white;">Delete this Camera</button>
+			</div>
+		</div>
+
+
+		<div id="editCamView">
+			<div class="header">
+				<button class="cancel" onClick="showCamView()">&#x2715;</button>
+				<span>Configure Camera</span>
+				<button class="save" onClick="addCamera()">&#x2713;</button>
+			</div>
+			<div class="form">
+				<div class="editFormField"><label for="name">Name:</label><input id="name" placeholder="The name of your camera"></input></div>
+				<div class="editFormField"><label for="host">Host or IP Address: </label><input id="host" placeholder="ex. 192.168.0.1"></input></div>
+				<div class="editFormField"><label for="port">Port: </label><input id="Port" placeholder="ex. 8080"></input></div>
+				<div class="editFormField"><label for="username">Username: </label><input id="username" placeholder="The username to log in to the camera"></input></div>
+				<div class="editFormField"><label for="password">Password: </label><input id="password" placeholder="The password to log in to the camera" type="password"></input></div>
+				<div class="editFormSelect"><label for="vendor">Vendor: </label>
+					<select id="vendorsEdit">
+						<script>
+							dict.then(function(result)
+							{
+								var node = document.getElementById("vendorsEdit");
+								var temp = `<option disabled selected value="select"> -- select one -- </option>`;
+								for(var key in result) 
+								{
+									temp += `<option value="`+ key + `">`+ key +`</option>`;
+								}
+								node.innerHTML = temp;
+							})
+						</script>
+					</select>
+				</div>
+				<div class="editFormSelect"><label for="modelEdit">Model: </label>
+						<select id="modelsEdit">
 							<option value="select"></option>
 						</select>
 				</div>				
@@ -108,7 +165,7 @@
 
 		<div id="iCamView">
 			<div class="header">
-				<button class="cancel" onClick="showCamView()">&#9881;</button>
+				<button class="cancel" onClick="showEditCamView()">&#9881;</button>
 				<span></span>
 				<button class="save" onClick="showAddCamView()">&plus;</button>
 			</div>
@@ -149,6 +206,8 @@
 	// Container for the Add Cam screen.
 	var addCam = document.getElementById("addCamView");
 
+	var editCamView = document.getElementById("editCamView");
+
 	var addCamBtn = document.getElementById("addCamBtn");
 
 
@@ -156,7 +215,8 @@
 	function hideAllViews()
 	{
 		iCamView.style.display = "none";
-		addCamView.style.display ="none";
+		addCamView.style.display = "none";
+		editCamView.style.display = "none";
 	}
 
 	function showCamView()
@@ -179,6 +239,18 @@
 	function hideAddCamView()
 	{
 		addCamView.style.display ="none";
+	}
+
+	function showEditCamView()
+	{
+		hideAllViews();
+		editCamView.style.display ="block";
+		fillForm();
+	}
+
+	function hideEditCamView()
+	{
+		editCamView.style.display ="none";
 	}
 
 	function returnHome()
@@ -227,13 +299,13 @@
 
 		buildfire.appData.insert(
 		{ 
-			name: document.getElementsByClassName('formField')[0].getElementsByTagName('input')[0].value, 
-			host: document.getElementsByClassName('formField')[1].getElementsByTagName('input')[0].value, 
-			port: document.getElementsByClassName('formField')[2].getElementsByTagName('input')[0].value, 
-			username: document.getElementsByClassName('formField')[3].getElementsByTagName('input')[0].value, 
-			password: document.getElementsByClassName('formField')[4].getElementsByTagName('input')[0].value, 
-			vendor: document.getElementsByClassName('formSelect')[0].getElementsByTagName('select')[0].value, 
-			model: document.getElementsByClassName('formSelect')[1].getElementsByTagName('select')[0].value, 
+			name: document.getElementsByClassName('addFormField')[0].getElementsByTagName('input')[0].value, 
+			host: document.getElementsByClassName('addFormField')[1].getElementsByTagName('input')[0].value, 
+			port: document.getElementsByClassName('addFormField')[2].getElementsByTagName('input')[0].value, 
+			username: document.getElementsByClassName('addFormField')[3].getElementsByTagName('input')[0].value, 
+			password: document.getElementsByClassName('addFormField')[4].getElementsByTagName('input')[0].value, 
+			vendor: document.getElementsByClassName('addFormSelect')[0].getElementsByTagName('select')[0].value, 
+			model: document.getElementsByClassName('addFormSelect')[1].getElementsByTagName('select')[0].value, 
 		},
 			"camInfo",
 			false,
@@ -241,7 +313,7 @@
 			if (err) return console.error("Error while inserting your data", err);
 			
 			loadCameras(swiper.slides.length);
-			clearForm();
+			clearAddForm();
 		});
 	}
 
@@ -264,7 +336,7 @@
 			for(let i = 0; i < result.length; i++)
 			{
 				swiper.appendSlide([
-				'<div class="swiper-slide"><img src="images/image.png"><span>'+ result[i]["data"].name + '</span></div>',
+				`<div class="swiper-slide" id = "` + result[i]["id"] + `"><img src="images/image.png"><span>`+ result[i]["data"].name + `</span></div>`,
 				]);		
 			}
 
@@ -288,11 +360,6 @@
 	function lastIndex()
 	{
 		swiper.slideTo(swiper.slides.length - 1);
-	}
-
-	function addCamToList()
-	{
-
 	}
 
 	function ui(elementType, appendTo, innerHTML, classNameArray)
@@ -323,21 +390,52 @@
 				if (err) return console.error(err);
 
 				console.log("Record deleted");
-				loadCameras();
 				});
 			}
+			loadCameras();
 		}
 		);
 	}
 
-	function clearForm()
+	function fillForm(indexId)
+	{
+		console.log(document.getElementsByClassName("swiper-slide-active")[0].id);
+		buildfire.appData.getById(
+		document.getElementsByClassName("swiper-slide-active")[0].id,
+		"camInfo",
+		(err, result) => {
+			if (err) return console.error("Error while retrieving your data", err);
+			console.log("Object: ", result.data);
+
+			document.getElementsByClassName('editFormField')[0].getElementsByTagName('input')[0].value = result.data.name; 
+			document.getElementsByClassName('editFormField')[1].getElementsByTagName('input')[0].value = result.data.host;
+			document.getElementsByClassName('editFormField')[2].getElementsByTagName('input')[0].value = result.data.port; 
+			document.getElementsByClassName('editFormField')[3].getElementsByTagName('input')[0].value = result.data.username; 
+			document.getElementsByClassName('editFormField')[4].getElementsByTagName('input')[0].value = result.data.password; 
+			document.getElementsByClassName('editFormSelect')[0].getElementsByTagName('select')[0].value = result.data.vendor; 
+			document.getElementsByClassName('editFormSelect')[1].getElementsByTagName('select')[0].value = result.data.model; 
+		}
+		);
+	}
+
+	function clearAddForm()
 	{
 		for(var i = 0; i < document.getElementsByClassName('formField').length; i++)
 		{
-			document.getElementsByClassName('formField')[i].getElementsByTagName('input')[0].value = "";
+			document.getElementsByClassName('addFormField')[i].getElementsByTagName('input')[0].value = "";
 		}
-		document.getElementsByClassName('formSelect')[0].getElementsByTagName('select')[0].value = "select";
-		document.getElementsByClassName('formSelect')[1].getElementsByTagName('select')[0].innerHTML = "";
+		document.getElementsByClassName('addFormSelect')[0].getElementsByTagName('select')[0].value = "select";
+		document.getElementsByClassName('addFormSelect')[1].getElementsByTagName('select')[0].innerHTML = "";
+	}
+
+	function clearEditForm()
+	{
+		for(var i = 0; i < document.getElementsByClassName('formField').length; i++)
+		{
+			document.getElementsByClassName('editFormField')[i].getElementsByTagName('input')[0].value = "";
+		}
+		document.getElementsByClassName('editFormSelect')[0].getElementsByTagName('select')[0].value = "select";
+		document.getElementsByClassName('editFormSelect')[1].getElementsByTagName('select')[0].innerHTML = "";
 	}
 
 </script>
