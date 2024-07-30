@@ -323,12 +323,11 @@
 				if (err) return console.error(err);
 
 				console.log("Record deleted");
+				loadCameras();
 				});
 			}
 		}
 		);
-
-		loadCameras();
 	}
 
 	function clearForm()
