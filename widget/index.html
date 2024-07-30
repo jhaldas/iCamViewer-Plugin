@@ -225,7 +225,7 @@
 		// '<div class="swiper-slide"><img src="images/image.png"><span>'+ document.getElementsByClassName('formField')[0].getElementsByTagName('input')[0].value + '</span></div>',
 		// ]);
 
-		buildfire.userData.insert(
+		buildfire.appData.insert(
 		{ 
 			name: document.getElementsByClassName('formField')[0].getElementsByTagName('input')[0].value, 
 			host: document.getElementsByClassName('formField')[1].getElementsByTagName('input')[0].value, 
@@ -251,7 +251,7 @@
 
 		document.getElementsByClassName('swiper-wrapper')[0].innerHTML = "";
 
-		buildfire.userData.search(
+		buildfire.appData.search(
 		{
 			filter: {
 			},
@@ -308,7 +308,7 @@
 	{
 		document.getElementsByClassName('swiper-wrapper')[0].innerHTML = "";
 
-		buildfire.userData.search(
+		buildfire.appData.search(
 		{
 			filter: {},
 			limit: 20,
@@ -319,15 +319,16 @@
 
 			for(let i = 0; i < result.length; i++)
 			{
-				buildfire.userData.delete(result[i].id, "camInfo", (err, result) => {
+				buildfire.appData.delete(result[i].id, "camInfo", (err, result) => {
 				if (err) return console.error(err);
 
-				loadCameras();
+				console.log("Record deleted");
 				});
 			}
 		}
 		);
 
+		loadCameras();
 	}
 
 	function clearForm()
