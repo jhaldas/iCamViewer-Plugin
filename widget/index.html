@@ -58,9 +58,8 @@
 							temp += `<option value='`+ result[key][i]+`''>` + result[key][i] + `</option>`;
 						}
 						$("#models").html(temp);
-						break;
+						return;
 					}
-					console.log("Nothing");
 				}
 			});
 		});
@@ -82,13 +81,13 @@
 				<div class="formField"><label for="port">Port: </label><input id="Port" placeholder="ex. 8080"></input></div>
 				<div class="formField"><label for="username">Username: </label><input id="username" placeholder="The username to log in to the camera"></input></div>
 				<div class="formField"><label for="password">Password: </label><input id="password" placeholder="The password to log in to the camera" type="password"></input></div>
-				<div class="formField"><label for="vendor">Vendor: </label>
+				<div class="formSelect"><label for="vendor">Vendor: </label>
 					<select id="vendors">
 						<script>
 							dict.then(function(result)
 							{
 								var node = document.getElementById("vendors");
-								var temp = `<option disabled selected value> -- select one -- </option>`;
+								var temp = `<option disabled selected value="select"> -- select one -- </option>`;
 								for(var key in result) 
 								{
 									temp += `<option value="`+ key + `">`+ key +`</option>`;
@@ -98,9 +97,9 @@
 						</script>
 					</select>
 				</div>
-				<div class="formField"><label for="model">Model: </label>
+				<div class="formSelect"><label for="model">Model: </label>
 						<select id="models">
-							<option value=""> -- select one -- </option>
+							<option value="select"></option>
 						</select>
 				</div>				
 				<button style="font-size:medium; width: 100%; padding:10px; border:none; background:none; color:white;">Delete this Camera</button>
@@ -234,8 +233,8 @@
 			port: document.getElementsByClassName('formField')[2].getElementsByTagName('input')[0].value, 
 			username: document.getElementsByClassName('formField')[3].getElementsByTagName('input')[0].value, 
 			password: document.getElementsByClassName('formField')[4].getElementsByTagName('input')[0].value, 
-			vendor: document.getElementsByClassName('formField')[5].getElementsByTagName('select')[0].value, 
-			model: document.getElementsByClassName('formField')[6].getElementsByTagName('select')[0].value, 
+			vendor: document.getElementsByClassName('formSelect')[0].getElementsByTagName('select')[0].value, 
+			model: document.getElementsByClassName('formSelect')[1].getElementsByTagName('select')[0].value, 
 		},
 			"camInfo",
 			false,
@@ -243,6 +242,7 @@
 			if (err) return console.error("Error while inserting your data", err);
 			
 			loadCameras(swiper.slides.length);
+			clearForm();
 		});
 	}
 
@@ -330,6 +330,8 @@
 		{
 			document.getElementsByClassName('formField')[i].getElementsByTagName('input')[0].value = "";
 		}
+		document.getElementsByClassName('formSelect')[0].getElementsByTagName('select')[0].value = "select";
+		document.getElementsByClassName('formSelect')[1].getElementsByTagName('select')[0].innerHTML = "";
 	}
 
 </script>

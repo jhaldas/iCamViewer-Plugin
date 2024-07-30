@@ -75,6 +75,15 @@
     width:100%;
   }
 
+  .formSelect
+  {
+    display:flex;
+    padding: 5px;
+    border-bottom: solid 1px #bbbdbf;
+    color:white;
+    width:100%;
+  }
+
   .form input
   {
     margin:auto;
