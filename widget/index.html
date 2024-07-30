@@ -44,29 +44,44 @@
 	var dict = parseVendorData();
 	dict.then(function(result)
 	{
-		//console.log(result);
-	})
+		$(document).ready(function () {
+			$("#vendors").change(function () {
 
-	//console.log(parseVendorData());
+				for(var key in result)
+				{
+					if(key == $(this).val())
+					{
+						console.log(key, result[key]);
+						var temp = "";
+						for(var i = 0; i < result[key].length; i++)
+						{
+							temp += `<option value='`+ result[key][i]+`''>` + result[key][i] + `</option>`;
+						}
+						$("#models").html(temp);
+						break;
+					}
+					console.log("Nothing");
+				}
 
-	$(document).ready(function () {
-		$("#vendors").change(function () {
-			switch($(this).val()) {
-				case 'vendor1':
-					$("#models").html("<option value='test'>item1: test 1</option><option value='test2'>item1: test 2</option>");
-					break;
-				case 'vendor2':
-					$("#models").html("<option value='test'>item2: test 1</option><option value='test2'>item2: test 2</option>");
-					break;
-				case 'vendor3':
-					$("#models").html("<option value='test'>item3: test 1</option><option value='test2'>item3: test 2</option>");
-					break;
-				default:
-					$("#models").html("<option value=''>--select one--</option>");
-			}
+				// switch($(this).val()) {
+				// 	case 'vendor1':
+				// 		$("#models").html("<option value='test'>item1: test 1</option><option value='test2'>item1: test 2</option>");
+				// 		break;
+				// 	case 'vendor2':
+				// 		$("#models").html("<option value='test'>item2: test 1</option><option value='test2'>item2: test 2</option>");
+				// 		break;
+				// 	case 'vendor3':
+				// 		$("#models").html("<option value='test'>item3: test 1</option><option value='test2'>item3: test 2</option>");
+				// 		break;
+				// 	default:
+				// 		$("#models").html("<option value=''>--select one--</option>");
+				// }
+
+				
+
+			});
 		});
-	});
-
+	})
 </script>
 
 </head>
@@ -90,8 +105,8 @@
 							dict.then(function(result)
 							{
 								var node = document.getElementById("vendors");
-								var temp = "";
-								console.log(result);
+								var temp = `<option value=""> -- select one -- </option>`;
+								//console.log(result);
 								for(var key in result) 
 								{
 									temp += `<option value="`+ key + `">`+ key +`</option>`;
@@ -100,9 +115,6 @@
 								node.innerHTML = temp;
 							})
 						</script>
-						<option value="vendor1">item1</option>
-						<option value="vendor2">item2</option>
-						<option value="vendor3">item3</option>
 					</select>
 				</div>
 				<div class="formField"><label for="model">Model: </label>
