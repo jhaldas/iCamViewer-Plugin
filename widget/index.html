@@ -54,7 +54,7 @@
 						var temp = "";
 						for(var i = 0; i < result[key].length; i++)
 						{
-							temp += `<option value='`+ result[key][i]+`''>` + result[key][i] + `</option>`;
+							temp += `<option value='`+ result[key][i]+`'>` + result[key][i] + `</option>`;
 						}
 						$("#modelsAdd").html(temp);
 						return;
@@ -73,7 +73,7 @@
 						var temp = "";
 						for(var i = 0; i < result[key].length; i++)
 						{
-							temp += `<option value='`+ result[key][i]+`''>` + result[key][i] + `</option>`;
+							temp += `<option value='`+ result[key][i]+`'>` + result[key][i] + `</option>`;
 						}
 						$("#modelsEdit").html(temp);
 						return;
@@ -129,8 +129,10 @@
 			<div class="header">
 				<button class="cancel" onClick="showCamView()">&#x2715;</button>
 				<span>Configure Camera</span>
-				<button class="save" onClick="addCamera()">&#x2713;</button>
+				<button class="save" onClick='updateCamera(document.getElementById("camId").innerHTML, document.getElementById("camIndex").innerHTML)'>&#x2713;</button>
 			</div>
+			<div id="camId" style="color:white"></div>
+			<div id="camIndex" style="display:none"></div>
 			<div class="form">
 				<div class="editFormField"><label for="name">Name:</label><input id="name" placeholder="The name of your camera"></input></div>
 				<div class="editFormField"><label for="host">Host or IP Address: </label><input id="host" placeholder="ex. 192.168.0.1"></input></div>
@@ -317,6 +319,31 @@
 		});
 	}
 
+	function updateCamera(camId, camIndex)
+	{
+		buildfire.appData.update(
+			camId,
+			{ 
+			name: document.getElementsByClassName('editFormField')[0].getElementsByTagName('input')[0].value, 
+			host: document.getElementsByClassName('editFormField')[1].getElementsByTagName('input')[0].value, 
+			port: document.getElementsByClassName('editFormField')[2].getElementsByTagName('input')[0].value, 
+			username: document.getElementsByClassName('editFormField')[3].getElementsByTagName('input')[0].value, 
+			password: document.getElementsByClassName('editFormField')[4].getElementsByTagName('input')[0].value, 
+			vendor: document.getElementsByClassName('editFormSelect')[0].getElementsByTagName('select')[0].value, 
+			model: document.getElementsByClassName('editFormSelect')[1].getElementsByTagName('select')[0].value, 
+		},
+			"camInfo",
+			(err, result) => {
+				if (err) return console.error("Error while inserting your data", err);
+
+				console.log("Update successful", result);
+
+				loadCameras(camIndex);
+				showCamView();
+			}
+		);
+	}
+
 	function loadCameras(indexToShow)
 	{
 		indexToShow = typeof indexToShow !== "undefined" ? indexToShow : 0;
@@ -400,6 +427,8 @@
 	function fillForm(indexId)
 	{
 		console.log(document.getElementsByClassName("swiper-slide-active")[0].id);
+		document.getElementById("camId").innerHTML = "" + document.getElementsByClassName("swiper-slide-active")[0].id;
+		document.getElementById("camIndex").innerHTML = "" + swiper.activeIndex;
 		buildfire.appData.getById(
 		document.getElementsByClassName("swiper-slide-active")[0].id,
 		"camInfo",
