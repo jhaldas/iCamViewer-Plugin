@@ -141,7 +141,7 @@
 				<div class="editFormField"><label for="password">Password: </label><input id="password" placeholder="The password to log in to the camera" type="password"></input></div>
 				<div class="editFormField"><label for="vendor">Vendor: </label><input id="vendor" style="color:grey" readonly></input></div>
 				<div class="editFormField"><label for="modelEdit">Model: </label><input id="model" style="color:grey" readonly></input></div>				
-				<button style="font-size:medium; width: 100%; padding:10px; border:none; background:none; color:white;">Delete this Camera</button>
+				<button onClick='deleteCamera(document.getElementById("camId").innerHTML)' style="font-size:medium; width: 100%; padding:10px; border:none; background:none; color:white;">Delete this Camera</button>
 			</div>
 		</div>
 
@@ -317,12 +317,24 @@
 			(err, result) => {
 				if (err) return console.error("Error while inserting your data", err);
 
-				console.log("Update successful", result);
+			console.log("Update successful", result);
 
-				loadCameras(camIndex);
-				showCamView();
+			loadCameras(camIndex);
+			showCamView();
 			}
 		);
+	}
+
+	function deleteCamera(camId)
+	{
+		buildfire.appData.delete(camId, "camInfo", (err, result) => {
+		if (err) return console.error(err);
+
+		console.log("Record deleted");
+
+		loadCameras();
+		showCamView();
+		});
 	}
 
 	function loadCameras(indexToShow)
