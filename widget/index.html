@@ -139,27 +139,8 @@
 				<div class="editFormField"><label for="port">Port: </label><input id="Port" placeholder="ex. 8080"></input></div>
 				<div class="editFormField"><label for="username">Username: </label><input id="username" placeholder="The username to log in to the camera"></input></div>
 				<div class="editFormField"><label for="password">Password: </label><input id="password" placeholder="The password to log in to the camera" type="password"></input></div>
-				<div class="editFormSelect"><label for="vendor">Vendor: </label>
-					<select id="vendorsEdit">
-						<script>
-							dict.then(function(result)
-							{
-								var node = document.getElementById("vendorsEdit");
-								var temp = `<option disabled selected value="select"> -- select one -- </option>`;
-								for(var key in result) 
-								{
-									temp += `<option value="`+ key + `">`+ key +`</option>`;
-								}
-								node.innerHTML = temp;
-							})
-						</script>
-					</select>
-				</div>
-				<div class="editFormSelect"><label for="modelEdit">Model: </label>
-						<select id="modelsEdit">
-							<option value="select"></option>
-						</select>
-				</div>				
+				<div class="editFormField"><label for="vendor">Vendor: </label><input id="vendor" style="color:grey" readonly></input></div>
+				<div class="editFormField"><label for="modelEdit">Model: </label><input id="model" style="color:grey" readonly></input></div>				
 				<button style="font-size:medium; width: 100%; padding:10px; border:none; background:none; color:white;">Delete this Camera</button>
 			</div>
 		</div>
@@ -329,8 +310,8 @@
 			port: document.getElementsByClassName('editFormField')[2].getElementsByTagName('input')[0].value, 
 			username: document.getElementsByClassName('editFormField')[3].getElementsByTagName('input')[0].value, 
 			password: document.getElementsByClassName('editFormField')[4].getElementsByTagName('input')[0].value, 
-			vendor: document.getElementsByClassName('editFormSelect')[0].getElementsByTagName('select')[0].value, 
-			model: document.getElementsByClassName('editFormSelect')[1].getElementsByTagName('select')[0].value, 
+			vendor: document.getElementsByClassName('editFormField')[5].getElementsByTagName('input')[0].value, 
+			model: document.getElementsByClassName('editFormField')[6].getElementsByTagName('input')[0].value, 
 		},
 			"camInfo",
 			(err, result) => {
@@ -440,8 +421,8 @@
 			document.getElementsByClassName('editFormField')[2].getElementsByTagName('input')[0].value = result.data.port; 
 			document.getElementsByClassName('editFormField')[3].getElementsByTagName('input')[0].value = result.data.username; 
 			document.getElementsByClassName('editFormField')[4].getElementsByTagName('input')[0].value = result.data.password; 
-			document.getElementsByClassName('editFormSelect')[0].getElementsByTagName('select')[0].value = result.data.vendor; 
-			document.getElementsByClassName('editFormSelect')[1].getElementsByTagName('select')[0].value = result.data.model;
+			document.getElementsByClassName('editFormField')[5].getElementsByTagName('input')[0].value = result.data.vendor; 
+			document.getElementsByClassName('editFormField')[6].getElementsByTagName('input')[0].value = result.data.model;
 		}
 		);
 	}
