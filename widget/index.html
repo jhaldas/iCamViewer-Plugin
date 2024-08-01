@@ -90,10 +90,10 @@
 		<div id="addCamView">
 			<div class="header">
 				<button class="cancel" onClick="showCamView()">&#x2715;</button>
-				<span>Configure Camera</span>
+				<span>Add New Camera</span>
 				<button class="save" onClick="addCamera()">&#x2713;</button>
 			</div>
-			<div class="form">
+			<form class="form" id="addForm">
 				<div class="addFormField"><label for="nameAdd">Name:</label><input id="nameAdd" placeholder="The name of your camera"></input></div>
 				<div class="addFormField"><label for="hostAdd">Host or IP Address: </label><input id="hostAdd" placeholder="ex. 192.168.0.1"></input></div>
 				<div class="addFormField"><label for="portAdd">Port: </label><input id="portAdd" placeholder="ex. 8080"></input></div>
@@ -120,15 +120,41 @@
 							<option value="select"></option>
 						</select>
 				</div>				
-				<button style="font-size:medium; width: 100%; padding:10px; border:none; background:none; color:white;">Delete this Camera</button>
-			</div>
+				<button onClick='addCamera()' style="font-size:medium; width: 100%; padding:10px; border:none; background:none; color:grey;">Add Camera</button>
+			</form>
+			<div id="error" style="color:red">Error:</div>
+			<script>
+
+				const addVendor = document.getElementById('vendorsAdd');
+				const addModel = document.getElementById('modelsAdd');
+				const form = document.getElementById('addForm');
+
+				form.addEventListener('submit', (e)=> 
+				{
+					let messages = [];
+					if(addVendor.value == null || addVendor == "-- select one --")
+					{
+						messages.push("Vendor is required");
+					}
+					else if(addModel.value == null || addModel == "-- select one --")
+					{
+						messages.push("Model is required");
+					}
+					
+					if (messages.length >= 0)
+					{
+						e.preventDefault();
+					}
+				})
+
+			</script>
 		</div>
 
 
 		<div id="editCamView">
 			<div class="header">
 				<button class="cancel" onClick="showCamView()">&#x2715;</button>
-				<span>Configure Camera</span>
+				<span>Update Configuration</span>
 				<button class="save" onClick='updateCamera(document.getElementById("camId").innerHTML, document.getElementById("camIndex").innerHTML)'>&#x2713;</button>
 			</div>
 			<div id="camId" style="color:white"></div>
@@ -192,7 +218,6 @@
 	var editCamView = document.getElementById("editCamView");
 
 	var addCamBtn = document.getElementById("addCamBtn");
-
 
 
 	function hideAllViews()
@@ -446,7 +471,7 @@
 			document.getElementsByClassName('addFormField')[i].getElementsByTagName('input')[0].value = "";
 		}
 		document.getElementsByClassName('addFormSelect')[0].getElementsByTagName('select')[0].value = "select";
-		document.getElementsByClassName('addFormSelect')[1].getElementsByTagName('select')[0].value = "";
+		document.getElementsByClassName('addFormSelect')[1].getElementsByTagName('select')[0].innerHTML = "";
 	}
 
 	function clearEditForm()
@@ -455,8 +480,6 @@
 		{
 			document.getElementsByClassName('editFormField')[i].getElementsByTagName('input')[0].value = "";
 		}
-		document.getElementsByClassName('editFormSelect')[0].getElementsByTagName('select')[0].value = "select";
-		document.getElementsByClassName('editFormSelect')[1].getElementsByTagName('select')[0].value = "";
 	}
 
 </script>
