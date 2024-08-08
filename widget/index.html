@@ -179,6 +179,9 @@
 				<button class="save" onClick="showAddCamView()">&plus;</button>
 			</div>
 
+			<img name='cam' id='cam' src='http://admin:admin@192.168.0.55:80/cgi-bin/view/image?pro_0' style='width:100%; max-width:100%; max-height:100%'/>
+        
+
 			<!-- Slider main container -->
 			<div class="swiper">
 				<!-- Additional required wrapper -->
@@ -481,6 +484,47 @@
 			document.getElementsByClassName('editFormField')[i].getElementsByTagName('input')[0].value = "";
 		}
 	}
+
+</script>
+
+<script>
+
+	setInterval(function() {
+		refreshCachedImage("cam");
+	}, 1000);
+
+
+	function refreshCachedImage(img_id) {
+		var img = document.getElementById(img_id);
+		//reloadImg('http://admin:admin@192.168.0.55:80/cgi-bin/view/image?pro_0');
+		img.src = "http://admin:admin@192.168.0.55:80/cgi-bin/view/image?pro_0" + Math.random();
+	};
+
+	async function reloadImg(url) {
+	await fetch(url, { cache: 'reload', mode: 'no-cors' })
+	document.body.querySelectorAll(`img[src='${url}']`)
+		.forEach(img => img.src = url)
+	}
+
+	// async function reloadImg(url) {
+	// await fetch(url, { cache: 'reload', mode: 'no-cors' })
+	// document.body.querySelectorAll(`img[src='${url}']`)
+	//     .forEach(img => img.src = url)
+	// }
+
+	// function updateImage()
+	// {
+	//     var image = document.getElementById("cam");
+	//     if(image.complete) {
+	//         var new_image = new Image();
+	//         //set up the new image
+	//         new_image.id = "theText";
+	//         new_image.src = image.src;           
+	//         // insert new image and remove old
+	//         image.parentNode.insertBefore(new_image,image);
+	//         image.parentNode.removeChild(image);
+	//     }
+	// }
 
 </script>
 
