@@ -26,16 +26,17 @@
 		for(let i = 0; i < json.length; i++) {
 			let obj = json[i];
 
-			//console.log(obj.vendor, obj.model);
-
 			if(ret[obj.vendor] == undefined)
 			{
 				ret[obj.vendor] = [];
 			}
-			ret[obj.vendor].push(obj.model);
+			let temp = {};
+			temp["imgUrl"] = obj.imageUrl;
+			temp["type"] = obj.type;
+			ret[obj.vendor][obj.model] = temp;
 		}
 
-		//console.log(stringify(ret));
+		console.log((ret));
 
 		return ret;
 	}
@@ -47,18 +48,39 @@
 		$(document).ready(function () {
 			$("#vendorsAdd").change(function () {
 
-				for(var key in result)
+				for(var vendor in result)
 				{
-					if(key == $(this).val())
+					//console.log(key);
+					if(vendor == $(this).val())
 					{
 						var temp = "";
-						for(var i = 0; i < result[key].length; i++)
+						temp += `<option disabled selected value="">-- select one --</option>`;
+						for(var key2 in result[vendor])
 						{
-							temp += `<option value='`+ result[key][i]+`'>` + result[key][i] + `</option>`;
+							//console.log(key2);
+							temp += `<option value='`+ key2 +`'>` + key2 + `</option>`;
 						}
 						$("#modelsAdd").html(temp);
 						return;
 					}
+				}
+			});
+		});
+
+		$(document).ready(function () {
+			$("#modelsAdd").change(function () {
+
+				for(var vendor in result)
+				{
+						for(var model in result[vendor])
+						{
+							if(model == $(this).val())
+							{
+								document.getElementById("imgUrl").innerHTML = result[vendor][model]["imgUrl"];
+								document.getElementById("type").innerHTML = result[vendor][model]["type"];
+							}
+						}
+						return;
 				}
 			});
 		});
@@ -73,7 +95,10 @@
 						var temp = "";
 						for(var i = 0; i < result[key].length; i++)
 						{
-							temp += `<option value='`+ result[key][i]+`'>` + result[key][i] + `</option>`;
+							temp += `<option value='`+ result[key][i]+`'>` + result[key][i]
+								//`<span hidden id="imgUrl" value="` + result[key][i] + 
+								//` `
+								+ `></option>`;
 						}
 						$("#modelsEdit").html(temp);
 						return;
@@ -90,10 +115,10 @@
 		<div id="addCamView">
 			<div class="header">
 				<button class="cancel" onClick="showCamView()">&#x2715;</button>
-				<span>Configure Camera</span>
+				<span>Add New Camera</span>
 				<button class="save" onClick="addCamera()">&#x2713;</button>
 			</div>
-			<div class="form">
+			<form class="form" id="addForm">
 				<div class="addFormField"><label for="nameAdd">Name:</label><input id="nameAdd" placeholder="The name of your camera"></input></div>
 				<div class="addFormField"><label for="hostAdd">Host or IP Address: </label><input id="hostAdd" placeholder="ex. 192.168.0.1"></input></div>
 				<div class="addFormField"><label for="portAdd">Port: </label><input id="portAdd" placeholder="ex. 8080"></input></div>
@@ -120,15 +145,43 @@
 							<option value="select"></option>
 						</select>
 				</div>				
-				<button style="font-size:medium; width: 100%; padding:10px; border:none; background:none; color:white;">Delete this Camera</button>
-			</div>
+				<button onClick='addCamera()' style="font-size:medium; width: 100%; padding:10px; border:none; background:none; color:grey;">Add Camera</button>
+			</form>
+			<div hidden id="imgUrl" style="color:white"></div>
+			<div hidden id="type" style="color:white"></div>
+			<!-- <div id="error" style="color:red">Error:</div> -->
+			<!-- <script>
+
+				const addVendor = document.getElementById('vendorsAdd');
+				const addModel = document.getElementById('modelsAdd');
+				const form = document.getElementById('addForm');
+
+				form.addEventListener('submit', (e)=> 
+				{
+					let messages = [];
+					if(addVendor.value == null || addVendor == "-- select one --")
+					{
+						messages.push("Vendor is required");
+					}
+					else if(addModel.value == null || addModel == "-- select one --")
+					{
+						messages.push("Model is required");
+					}
+					
+					if (messages.length >= 0)
+					{
+						e.preventDefault();
+					}
+				})
+
+			</script> -->
 		</div>
 
 
 		<div id="editCamView">
 			<div class="header">
 				<button class="cancel" onClick="showCamView()">&#x2715;</button>
-				<span>Configure Camera</span>
+				<span>Update Configuration</span>
 				<button class="save" onClick='updateCamera(document.getElementById("camId").innerHTML, document.getElementById("camIndex").innerHTML)'>&#x2713;</button>
 			</div>
 			<div id="camId" style="color:white"></div>
@@ -152,6 +205,9 @@
 				<span></span>
 				<button class="save" onClick="showAddCamView()">&plus;</button>
 			</div>
+
+			<img name='cam' id='cam' src='http://admin:admin@192.168.0.55:80/cgi-bin/view/image?pro_0' style='width:100%; max-width:100%; max-height:100%'/>
+        
 
 			<!-- Slider main container -->
 			<div class="swiper">
@@ -192,7 +248,6 @@
 	var editCamView = document.getElementById("editCamView");
 
 	var addCamBtn = document.getElementById("addCamBtn");
-
 
 
 	function hideAllViews()
@@ -274,11 +329,8 @@
 
 	function addCamera(camName)
 	{
-		let camList = { cams: []};
 
-		//  swiper.appendSlide([
-		// '<div class="swiper-slide"><img src="images/image.png"><span>'+ document.getElementsByClassName('formField')[0].getElementsByTagName('input')[0].value + '</span></div>',
-		// ]);
+		let camList = { cams: []};
 
 		buildfire.appData.insert(
 		{ 
@@ -288,7 +340,9 @@
 			username: document.getElementsByClassName('addFormField')[3].getElementsByTagName('input')[0].value, 
 			password: document.getElementsByClassName('addFormField')[4].getElementsByTagName('input')[0].value, 
 			vendor: document.getElementsByClassName('addFormSelect')[0].getElementsByTagName('select')[0].value, 
-			model: document.getElementsByClassName('addFormSelect')[1].getElementsByTagName('select')[0].value, 
+			model: document.getElementsByClassName('addFormSelect')[1].getElementsByTagName('select')[0].value,
+			imgUrl: document.getElementById("imgUrl").innerText,
+			type: document.getElementById("type").innerText,
 		},
 			"camInfo",
 			false,
@@ -312,6 +366,8 @@
 			password: document.getElementsByClassName('editFormField')[4].getElementsByTagName('input')[0].value, 
 			vendor: document.getElementsByClassName('editFormField')[5].getElementsByTagName('input')[0].value, 
 			model: document.getElementsByClassName('editFormField')[6].getElementsByTagName('input')[0].value, 
+			imgUrl: dict[vendor][model]["imgUrl"],
+			type: dict[vendor][model]["type"],
 		},
 			"camInfo",
 			(err, result) => {
@@ -446,7 +502,7 @@
 			document.getElementsByClassName('addFormField')[i].getElementsByTagName('input')[0].value = "";
 		}
 		document.getElementsByClassName('addFormSelect')[0].getElementsByTagName('select')[0].value = "select";
-		document.getElementsByClassName('addFormSelect')[1].getElementsByTagName('select')[0].value = "";
+		document.getElementsByClassName('addFormSelect')[1].getElementsByTagName('select')[0].innerHTML = "";
 	}
 
 	function clearEditForm()
@@ -455,9 +511,48 @@
 		{
 			document.getElementsByClassName('editFormField')[i].getElementsByTagName('input')[0].value = "";
 		}
-		document.getElementsByClassName('editFormSelect')[0].getElementsByTagName('select')[0].value = "select";
-		document.getElementsByClassName('editFormSelect')[1].getElementsByTagName('select')[0].value = "";
 	}
+
+</script>
+
+<script>
+
+	setInterval(function() {
+		refreshCachedImage("cam");
+	}, 1000);
+
+
+	function refreshCachedImage(img_id) {
+		var img = document.getElementById(img_id);
+		//reloadImg('http://admin:admin@192.168.0.55:80/cgi-bin/view/image?pro_0');
+		img.src = "http://admin:admin@192.168.0.55:80/cgi-bin/view/image?pro_0" + Math.random();
+	};
+
+	async function reloadImg(url) {
+	await fetch(url, { cache: 'reload', mode: 'no-cors' })
+	document.body.querySelectorAll(`img[src='${url}']`)
+		.forEach(img => img.src = url)
+	}
+
+	// async function reloadImg(url) {
+	// await fetch(url, { cache: 'reload', mode: 'no-cors' })
+	// document.body.querySelectorAll(`img[src='${url}']`)
+	//     .forEach(img => img.src = url)
+	// }
+
+	// function updateImage()
+	// {
+	//     var image = document.getElementById("cam");
+	//     if(image.complete) {
+	//         var new_image = new Image();
+	//         //set up the new image
+	//         new_image.id = "theText";
+	//         new_image.src = image.src;           
+	//         // insert new image and remove old
+	//         image.parentNode.insertBefore(new_image,image);
+	//         image.parentNode.removeChild(image);
+	//     }
+	// }
 
 </script>
 
