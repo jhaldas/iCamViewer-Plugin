@@ -26,16 +26,17 @@
 		for(let i = 0; i < json.length; i++) {
 			let obj = json[i];
 
-			//console.log(obj.vendor, obj.model);
-
 			if(ret[obj.vendor] == undefined)
 			{
 				ret[obj.vendor] = [];
 			}
-			ret[obj.vendor].push(obj.model);
+			let temp = {};
+			temp["imgUrl"] = obj.imageUrl;
+			temp["type"] = obj.type;
+			ret[obj.vendor][obj.model] = temp;
 		}
 
-		//console.log(stringify(ret));
+		console.log((ret));
 
 		return ret;
 	}
@@ -47,18 +48,39 @@
 		$(document).ready(function () {
 			$("#vendorsAdd").change(function () {
 
-				for(var key in result)
+				for(var vendor in result)
 				{
-					if(key == $(this).val())
+					//console.log(key);
+					if(vendor == $(this).val())
 					{
 						var temp = "";
-						for(var i = 0; i < result[key].length; i++)
+						temp += `<option disabled selected value="">-- select one --</option>`;
+						for(var key2 in result[vendor])
 						{
-							temp += `<option value='`+ result[key][i]+`'>` + result[key][i] + `</option>`;
+							//console.log(key2);
+							temp += `<option value='`+ key2 +`'>` + key2 + `</option>`;
 						}
 						$("#modelsAdd").html(temp);
 						return;
 					}
+				}
+			});
+		});
+
+		$(document).ready(function () {
+			$("#modelsAdd").change(function () {
+
+				for(var vendor in result)
+				{
+						for(var model in result[vendor])
+						{
+							if(model == $(this).val())
+							{
+								document.getElementById("imgUrl").innerHTML = result[vendor][model]["imgUrl"];
+								document.getElementById("type").innerHTML = result[vendor][model]["type"];
+							}
+						}
+						return;
 				}
 			});
 		});
@@ -73,7 +95,10 @@
 						var temp = "";
 						for(var i = 0; i < result[key].length; i++)
 						{
-							temp += `<option value='`+ result[key][i]+`'>` + result[key][i] + `</option>`;
+							temp += `<option value='`+ result[key][i]+`'>` + result[key][i]
+								//`<span hidden id="imgUrl" value="` + result[key][i] + 
+								//` `
+								+ `></option>`;
 						}
 						$("#modelsEdit").html(temp);
 						return;
@@ -122,8 +147,10 @@
 				</div>				
 				<button onClick='addCamera()' style="font-size:medium; width: 100%; padding:10px; border:none; background:none; color:grey;">Add Camera</button>
 			</form>
-			<div id="error" style="color:red">Error:</div>
-			<script>
+			<div hidden id="imgUrl" style="color:white"></div>
+			<div hidden id="type" style="color:white"></div>
+			<!-- <div id="error" style="color:red">Error:</div> -->
+			<!-- <script>
 
 				const addVendor = document.getElementById('vendorsAdd');
 				const addModel = document.getElementById('modelsAdd');
@@ -147,7 +174,7 @@
 					}
 				})
 
-			</script>
+			</script> -->
 		</div>
 
 
@@ -302,11 +329,8 @@
 
 	function addCamera(camName)
 	{
-		let camList = { cams: []};
 
-		//  swiper.appendSlide([
-		// '<div class="swiper-slide"><img src="images/image.png"><span>'+ document.getElementsByClassName('formField')[0].getElementsByTagName('input')[0].value + '</span></div>',
-		// ]);
+		let camList = { cams: []};
 
 		buildfire.appData.insert(
 		{ 
@@ -316,7 +340,9 @@
 			username: document.getElementsByClassName('addFormField')[3].getElementsByTagName('input')[0].value, 
 			password: document.getElementsByClassName('addFormField')[4].getElementsByTagName('input')[0].value, 
 			vendor: document.getElementsByClassName('addFormSelect')[0].getElementsByTagName('select')[0].value, 
-			model: document.getElementsByClassName('addFormSelect')[1].getElementsByTagName('select')[0].value, 
+			model: document.getElementsByClassName('addFormSelect')[1].getElementsByTagName('select')[0].value,
+			imgUrl: document.getElementById("imgUrl").innerText,
+			type: document.getElementById("type").innerText,
 		},
 			"camInfo",
 			false,
@@ -340,6 +366,8 @@
 			password: document.getElementsByClassName('editFormField')[4].getElementsByTagName('input')[0].value, 
 			vendor: document.getElementsByClassName('editFormField')[5].getElementsByTagName('input')[0].value, 
 			model: document.getElementsByClassName('editFormField')[6].getElementsByTagName('input')[0].value, 
+			imgUrl: dict[vendor][model]["imgUrl"],
+			type: dict[vendor][model]["type"],
 		},
 			"camInfo",
 			(err, result) => {
