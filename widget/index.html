@@ -334,8 +334,10 @@
 	// },
 	});
 
+	// Adds a camera to the app data database from the add camera form
 	function addCamera(camName)
 	{
+		// Grab camera properties from add form
 		let camProperties = 
 		{
 			name: document.getElementsByClassName('addFormField')[0].getElementsByTagName('input')[0].value, 
@@ -350,10 +352,10 @@
 			filledImgUrl : ""
 		}
 
+		// Update the filled img url with the correct result using regex
 		camProperties["filledImgUrl"] = returnURL(camProperties, document.getElementById("imgUrl").innerText);
 
-		console.log(camProperties["filledImgUrl"]);
-
+		// Insert data into buildfire app data
 		buildfire.appData.insert(
 		 
 			camProperties
@@ -368,8 +370,10 @@
 		});
 	}
 
+	// Updates a cameras data in app data database with values from edit form
 	function updateCamera(camId, camIndex)
 	{
+		// Grab camera properties from edit form
 		let camProperties = 
 		{
 			name: document.getElementsByClassName('editFormField')[0].getElementsByTagName('input')[0].value, 
@@ -386,9 +390,6 @@
 
 		camProperties["filledImgUrl"] = returnURL(camProperties, document.getElementById("editImgUrl").innerText);
 
-		console.log(camProperties["filledImgUrl"]);
-
-
 		buildfire.appData.update(
 			camId,
 			camProperties,
@@ -404,6 +405,7 @@
 		);
 	}
 
+	// Delete a camera from app data given an id
 	function deleteCamera(camId)
 	{
 		buildfire.appData.delete(camId, "camInfo", (err, result) => {
@@ -416,6 +418,7 @@
 		});
 	}
 
+	//  Reloads all cameras in swiper using app data, displays a black image if none are found, takes an optional index as argument to show desired camera.
 	function loadCameras(indexToShow)
 	{
 		indexToShow = typeof indexToShow !== "undefined" ? indexToShow : 0;
@@ -434,8 +437,6 @@
 
 			for(let i = 0; i < result.length; i++)
 			{
-				console.log("IOSAJDOISJADOIJSA:");
-				console.log(result[i]["data"]);
 				swiper.appendSlide([
 				`<div class="swiper-slide" id = "` + result[i]["id"] + `"><img width="400" height="400" id="image" src="` + result[i]["data"]["filledImgUrl"]
 					 + `"><span>`+ result[i]["data"]["name"] + `</span></div>`,
@@ -454,25 +455,13 @@
 		);
 	}
 
-	function save(callback)
-	{
-		buildfire.datastore.save(camList, "taskListCol", callback);
-	}
-
+	// Goes to last camera index
 	function lastIndex()
 	{
 		swiper.slideTo(swiper.slides.length - 1);
 	}
 
-	function ui(elementType, appendTo, innerHTML, classNameArray)
-	{
-		let e = document.createElement(elementType);
-		if(innerHTML) e.innterHTML = innterHTML;
-		if(Array.isArray(classNameArray)) classNameArray.forEach(c=>e.classList.add(c));
-		if(appendTo) appendTo.appendChild(e);
-		return e;
-	}
-
+	// Deletes all cameras in app data
 	function deleteAllCams()
 	{
 		document.getElementsByClassName('swiper-wrapper')[0].innerHTML = "";
@@ -499,9 +488,9 @@
 		);
 	}
 
+	// Fills the edit form with values from the camera at the current swiper index
 	function fillForm(indexId)
 	{
-		console.log(document.getElementsByClassName("swiper-slide-active")[0].id);
 		document.getElementById("camId").innerHTML = "" + document.getElementsByClassName("swiper-slide-active")[0].id;
 		document.getElementById("camIndex").innerHTML = "" + swiper.activeIndex;
 		buildfire.appData.getById(
@@ -524,6 +513,7 @@
 		);
 	}
 
+	// Clears add camera form
 	function clearAddForm()
 	{
 		for(var i = 0; i < document.getElementsByClassName('addFormField').length; i++)
@@ -534,12 +524,16 @@
 		document.getElementsByClassName('addFormSelect')[1].getElementsByTagName('select')[0].innerHTML = "";
 	}
 
+	// Clears edit camera form
 	function clearEditForm()
 	{
 		for(var i = 0; i < document.getElementsByClassName('formField').length; i++)
 		{
 			document.getElementsByClassName('editFormField')[i].getElementsByTagName('input')[0].value = "";
 		}
+		document.getElementById('editImgUrl').innerText = ""; 
+		document.getElementById('editType').innerText = "";
+		document.getElementById('editFilledUrl').innerText = "";
 	}
 
 </script>
@@ -548,12 +542,10 @@
 
 	// Updates the active camera every second
 	setInterval(function() {
-		//refreshCachedImage(document.getElementById("cam"));
-		//console.log(swiper.slides[swiper.activeIndex].getElementsByTagName("img")[0].src);
 		refreshCachedImage(swiper.slides[swiper.activeIndex].getElementsByTagName("img")[0]);
 	}, 1000);
 
-
+	// Refreshes the image of active swiper index
 	function refreshCachedImage(imgElement) {
 
 		checkIfImageExists(imgElement.src, (exists) => {
@@ -567,9 +559,6 @@
 			return;
 		}
 		});
-
-		//var img = imgElement;
-		//imgElement.src = imgElement.src + Math.random();
 	};
 
 	async function reloadImg(url) {
@@ -595,28 +584,6 @@
 		};
 	}
 	}
-
-
-
-	// async function reloadImg(url) {
-	// await fetch(url, { cache: 'reload', mode: 'no-cors' })
-	// document.body.querySelectorAll(`img[src='${url}']`)
-	//     .forEach(img => img.src = url)
-	// }
-
-	// function updateImage()
-	// {
-	//     var image = document.getElementById("cam");
-	//     if(image.complete) {
-	//         var new_image = new Image();
-	//         //set up the new image
-	//         new_image.id = "theText";
-	//         new_image.src = image.src;           
-	//         // insert new image and remove old
-	//         image.parentNode.insertBefore(new_image,image);
-	//         image.parentNode.removeChild(image);
-	//     }
-	// }
 
 </script>
 <script>
