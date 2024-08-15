@@ -8,14 +8,12 @@
   <script src="../../../scripts/buildfire/components/popup/popup.js"></script>
   <script src="../../../scripts/buildfire/components/drawer/drawer.js"></script>
   <link rel="stylesheet" href="style.css">
-  <link
-  rel="stylesheet"
-  href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css"
-/>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css"/>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+  <script>
 
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
-<script>
 
+	// Reads camera vendor and model data and parses into a dict for easier use later
 	async function parseVendorData()
 	{
 		const response = await fetch('https://ab.azureedge.net/feed/getfeed?name=DM_cctv-camera-configs-v3&version=803');
@@ -45,6 +43,7 @@
 	var dict = parseVendorData();
 	dict.then(function(result)
 	{
+		// When vendor selection is changed update the models in the add screen
 		$(document).ready(function () {
 			$("#vendorsAdd").change(function () {
 
@@ -67,24 +66,26 @@
 			});
 		});
 
+		// When models selection is changed update the image url and type 
 		$(document).ready(function () {
 			$("#modelsAdd").change(function () {
-
 				for(var vendor in result)
 				{
 						for(var model in result[vendor])
 						{
+							console.log(model);
 							if(model == $(this).val())
 							{
 								document.getElementById("imgUrl").innerHTML = result[vendor][model]["imgUrl"];
 								document.getElementById("type").innerHTML = result[vendor][model]["type"];
+								return;
 							}
 						}
-						return;
 				}
 			});
 		});
 
+		// When vendor selection is changed update the models in the edit screen
 		$(document).ready(function () {
 			$("#vendorsEdit").change(function () {
 
@@ -95,10 +96,7 @@
 						var temp = "";
 						for(var i = 0; i < result[key].length; i++)
 						{
-							temp += `<option value='`+ result[key][i]+`'>` + result[key][i]
-								//`<span hidden id="imgUrl" value="` + result[key][i] + 
-								//` `
-								+ `></option>`;
+							temp += `<option value='`+ result[key][i]+`'>` + result[key][i] + `></option>`;
 						}
 						$("#modelsEdit").html(temp);
 						return;
@@ -112,6 +110,7 @@
 </head>
 <body>
 	<div class="container">
+		<!-- Add camera screen -->
 		<div id="addCamView">
 			<div class="header">
 				<button class="cancel" onClick="showCamView()">&#x2715;</button>
@@ -147,8 +146,10 @@
 				</div>				
 				<button onClick='addCamera()' style="font-size:medium; width: 100%; padding:10px; border:none; background:none; color:grey;">Add Camera</button>
 			</form>
-			<div hidden id="imgUrl" style="color:white"></div>
-			<div hidden id="type" style="color:white"></div>
+			<div id="imgUrl" style="color:white"></div>
+			<div id="type" style="color:white"></div>
+
+			<!-- Form Validation -->
 			<!-- <div id="error" style="color:red">Error:</div> -->
 			<!-- <script>
 
@@ -177,7 +178,7 @@
 			</script> -->
 		</div>
 
-
+		<!-- Edit camera screen -->
 		<div id="editCamView">
 			<div class="header">
 				<button class="cancel" onClick="showCamView()">&#x2715;</button>
@@ -186,7 +187,7 @@
 			</div>
 			<div id="camId" style="color:white"></div>
 			<div id="camIndex" style="display:none"></div>
-			<div class="form">
+			<form class="form" id="editForm">
 				<div class="editFormField"><label for="name">Name:</label><input id="name" placeholder="The name of your camera"></input></div>
 				<div class="editFormField"><label for="host">Host or IP Address: </label><input id="host" placeholder="ex. 192.168.0.1"></input></div>
 				<div class="editFormField"><label for="port">Port: </label><input id="Port" placeholder="ex. 8080"></input></div>
@@ -195,18 +196,21 @@
 				<div class="editFormField"><label for="vendor">Vendor: </label><input id="vendor" style="color:grey" readonly></input></div>
 				<div class="editFormField"><label for="modelEdit">Model: </label><input id="model" style="color:grey" readonly></input></div>				
 				<button onClick='deleteCamera(document.getElementById("camId").innerHTML)' style="font-size:medium; width: 100%; padding:10px; border:none; background:none; color:white;">Delete this Camera</button>
-			</div>
+			</form>
+			<div id="editImgUrl" style="color:white"></div>
+			<div id="editType" style="color:white"></div>
+			<div id="editFilledUrl" style="color:white"></div>
 		</div>
 
-
+		<!-- Camera viewing screen -->
 		<div id="iCamView">
 			<div class="header">
 				<button class="cancel" onClick="showEditCamView()">&#9881;</button>
-				<span></span>
+				<span>Cameras</span>
 				<button class="save" onClick="showAddCamView()">&plus;</button>
 			</div>
 
-			<img name='cam' id='cam' src='http://admin:admin@192.168.0.55:80/cgi-bin/view/image?pro_0' style='width:100%; max-width:100%; max-height:100%'/>
+			<!-- <img name='cam' id='cam' src='http://admin:admin@192.168.0.55:80/cgi-bin/view/image?pro_0' style='width:100%; max-width:100%; max-height:100%'/> -->
         
 
 			<!-- Slider main container -->
@@ -249,7 +253,7 @@
 
 	var addCamBtn = document.getElementById("addCamBtn");
 
-
+	// Hides all screens
 	function hideAllViews()
 	{
 		iCamView.style.display = "none";
@@ -257,6 +261,7 @@
 		editCamView.style.display = "none";
 	}
 
+	// Displays cam view
 	function showCamView()
 	{
 		hideAllViews();
@@ -300,10 +305,12 @@
 
 <script>
 
+	// Load cameras on startup
 	window.onload = loadCameras();
 
+	// Initialize swiper for camera display
 	const swiper = new Swiper('.swiper', {
-	// Optional parameters
+	// Optional swiper parameters
 	direction: 'horizontal',
 	loop: false,
 	allowTouchMove:true,
@@ -329,11 +336,8 @@
 
 	function addCamera(camName)
 	{
-
-		let camList = { cams: []};
-
-		buildfire.appData.insert(
-		{ 
+		let camProperties = 
+		{
 			name: document.getElementsByClassName('addFormField')[0].getElementsByTagName('input')[0].value, 
 			host: document.getElementsByClassName('addFormField')[1].getElementsByTagName('input')[0].value, 
 			port: document.getElementsByClassName('addFormField')[2].getElementsByTagName('input')[0].value, 
@@ -343,7 +347,17 @@
 			model: document.getElementsByClassName('addFormSelect')[1].getElementsByTagName('select')[0].value,
 			imgUrl: document.getElementById("imgUrl").innerText,
 			type: document.getElementById("type").innerText,
-		},
+			filledImgUrl : ""
+		}
+
+		camProperties["filledImgUrl"] = returnURL(camProperties, document.getElementById("imgUrl").innerText);
+
+		console.log(camProperties["filledImgUrl"]);
+
+		buildfire.appData.insert(
+		 
+			camProperties
+		,
 			"camInfo",
 			false,
 		(err, result) => {
@@ -356,19 +370,28 @@
 
 	function updateCamera(camId, camIndex)
 	{
-		buildfire.appData.update(
-			camId,
-			{ 
+		let camProperties = 
+		{
 			name: document.getElementsByClassName('editFormField')[0].getElementsByTagName('input')[0].value, 
 			host: document.getElementsByClassName('editFormField')[1].getElementsByTagName('input')[0].value, 
 			port: document.getElementsByClassName('editFormField')[2].getElementsByTagName('input')[0].value, 
 			username: document.getElementsByClassName('editFormField')[3].getElementsByTagName('input')[0].value, 
 			password: document.getElementsByClassName('editFormField')[4].getElementsByTagName('input')[0].value, 
 			vendor: document.getElementsByClassName('editFormField')[5].getElementsByTagName('input')[0].value, 
-			model: document.getElementsByClassName('editFormField')[6].getElementsByTagName('input')[0].value, 
-			imgUrl: dict[vendor][model]["imgUrl"],
-			type: dict[vendor][model]["type"],
-		},
+			model: document.getElementsByClassName('editFormField')[6].getElementsByTagName('input')[0].value,
+			imgUrl: document.getElementById("editImgUrl").innerText,
+			type: document.getElementById("editType").innerText,
+			filledImgUrl : ""
+		}
+
+		camProperties["filledImgUrl"] = returnURL(camProperties, document.getElementById("editImgUrl").innerText);
+
+		console.log(camProperties["filledImgUrl"]);
+
+
+		buildfire.appData.update(
+			camId,
+			camProperties,
 			"camInfo",
 			(err, result) => {
 				if (err) return console.error("Error while inserting your data", err);
@@ -411,8 +434,11 @@
 
 			for(let i = 0; i < result.length; i++)
 			{
+				console.log("IOSAJDOISJADOIJSA:");
+				console.log(result[i]["data"]);
 				swiper.appendSlide([
-				`<div class="swiper-slide" id = "` + result[i]["id"] + `"><img src="images/image.png"><span>`+ result[i]["data"].name + `</span></div>`,
+				`<div class="swiper-slide" id = "` + result[i]["id"] + `"><img width="400" height="400" id="image" src="` + result[i]["data"]["filledImgUrl"]
+					 + `"><span>`+ result[i]["data"]["name"] + `</span></div>`,
 				]);		
 			}
 
@@ -491,6 +517,9 @@
 			document.getElementsByClassName('editFormField')[4].getElementsByTagName('input')[0].value = result.data.password; 
 			document.getElementsByClassName('editFormField')[5].getElementsByTagName('input')[0].value = result.data.vendor; 
 			document.getElementsByClassName('editFormField')[6].getElementsByTagName('input')[0].value = result.data.model;
+			document.getElementById('editImgUrl').innerText = result.data.imgUrl; 
+			document.getElementById('editType').innerText = result.data.type;
+			document.getElementById('editFilledUrl').innerText = result.data.filledImgUrl;
 		}
 		);
 	}
@@ -517,15 +546,30 @@
 
 <script>
 
+	// Updates the active camera every second
 	setInterval(function() {
-		refreshCachedImage("cam");
+		//refreshCachedImage(document.getElementById("cam"));
+		//console.log(swiper.slides[swiper.activeIndex].getElementsByTagName("img")[0].src);
+		refreshCachedImage(swiper.slides[swiper.activeIndex].getElementsByTagName("img")[0]);
 	}, 1000);
 
 
-	function refreshCachedImage(img_id) {
-		var img = document.getElementById(img_id);
-		//reloadImg('http://admin:admin@192.168.0.55:80/cgi-bin/view/image?pro_0');
-		img.src = "http://admin:admin@192.168.0.55:80/cgi-bin/view/image?pro_0" + Math.random();
+	function refreshCachedImage(imgElement) {
+
+		checkIfImageExists(imgElement.src, (exists) => {
+		if (exists) {
+			console.log('Image exists. ')
+			imgElement.src = imgElement.src + "?" + Math.random();
+			return;
+		} else {
+			console.error('Image does not exists.');
+			imgElement.src = "../widget/images/Solid_black.png";
+			return;
+		}
+		});
+
+		//var img = imgElement;
+		//imgElement.src = imgElement.src + Math.random();
 	};
 
 	async function reloadImg(url) {
@@ -533,6 +577,26 @@
 	document.body.querySelectorAll(`img[src='${url}']`)
 		.forEach(img => img.src = url)
 	}
+
+	// CHECK IF IMAGE EXISTS
+	function checkIfImageExists(url, callback) {
+	const img = new Image();
+	img.src = url;
+	
+	if (img.complete) {
+		callback(true);
+	} else {
+		img.onload = () => {
+		callback(true);
+		};
+		
+		img.onerror = () => {
+		callback(false);
+		};
+	}
+	}
+
+
 
 	// async function reloadImg(url) {
 	// await fetch(url, { cache: 'reload', mode: 'no-cors' })
@@ -553,6 +617,155 @@
 	//         image.parentNode.removeChild(image);
 	//     }
 	// }
+
+</script>
+<script>
+
+	function fetchDataIntoObj(id)
+	{
+		buildfire.appData.getById(
+		id,
+		"camInfo",
+		(err, result) => {
+			if (err) return console.error("Error while retrieving your data", err);
+			const ret = 
+			{
+				vendor : result.vendor,
+				model : result.model,
+				username : result.username,
+				password : result.password,
+				host : result.host,
+				port : result.port,
+			}
+		}
+		);
+	}
+
+	async function getURL(deviceInfo)
+	{
+		const fs = require('fs');
+
+		const response = await fetch('https://ab.azureedge.net/feed/getfeed?name=DM_cctv-camera-configs-v3&version=803');
+		const cameras = await response.json();
+
+		// Example device information object
+		const deviceInfoTemplate = {
+			vendor: "Zavio",  // Vendor name
+			model: "F1100",   // Model name
+			username: "admin",  // Username for authentication
+			password: "admin",  // Password for authentication
+			host: "192.168.0.55",  // Host IP address
+			port: null  // Port is not provided (null indicates no port)
+		};
+
+		// Load the camera information from a JSON file
+		// fs.readFile('cameras.json', 'utf8', (err, data) => {
+		// 	if (err) throw err;
+			
+		// 	const cameras = JSON.parse(data);  // Parse JSON data into the cameras array
+
+			// Iterate through each camera in the JSON data
+			for (let index = 0; index < cameras.length; index++) {
+				const camera = cameras[index];
+
+				// Check if the vendor and model match the device information
+				if (camera.vendor === deviceInfo.vendor && camera.model === deviceInfo.model) {
+					console.log(index);  // Print the index of the matched camera entry
+					let imageUrlTemplate = camera.imageUrl;  // Get the image URL template from the matched camera entry
+
+					// Remove the entire URL template string from the template to get the base part of the URL
+					let endString = imageUrlTemplate.replace(
+						/http:\/\/\{\{#username\}\}\{\{username\}\}\{\{#password\}\}:\{\{password\}\}\{\{\/\}\}@\{\{\/\}\}\{\{host\}\}\{\{#port\}\}:\{\{port\}\}\{\{\/\}\}/, 
+						""
+					);
+
+					// Determine the start of the URL based on the available device information
+					let startString = "";
+
+					if (deviceInfo.username && deviceInfo.password && deviceInfo.port) {
+						// All username, password, and port are provided
+						startString = `http://${deviceInfo.username}:${deviceInfo.password}@${deviceInfo.host}:${deviceInfo.port}`;
+					} else if (deviceInfo.username && deviceInfo.password && !deviceInfo.port) {
+						// Username and password are provided, but no port
+						startString = `http://${deviceInfo.username}:${deviceInfo.password}@${deviceInfo.host}`;
+					} else if (!deviceInfo.username && !deviceInfo.password && deviceInfo.port) {
+						// Only the port is provided
+						startString = `http://${deviceInfo.host}:${deviceInfo.port}`;
+					} else if (deviceInfo.username && !deviceInfo.password && deviceInfo.port) {
+						// Username and port are provided, but no password
+						startString = `http://${deviceInfo.username}@${deviceInfo.host}:${deviceInfo.port}`;
+					} else if (deviceInfo.username && !deviceInfo.password && !deviceInfo.port) {
+						// Only the username is provided
+						startString = `http://${deviceInfo.username}@${deviceInfo.host}`;
+					} else if (!deviceInfo.username && !deviceInfo.password && !deviceInfo.port) {
+						// Neither username, password, nor port is provided
+						startString = `http://${deviceInfo.host}`;
+					}
+
+					// Replace placeholders in the remaining template (endString) with actual values
+					endString = endString.replace(/\{\{username\}\}/g, deviceInfo.username || "");
+					endString = endString.replace(/(\{\{#password\}\})?\{\{password\}\}/g, deviceInfo.password || "");
+					endString = endString.replace(/\{\{\/\}\}/g, "");
+
+					// Combine the start and end strings to form the full URL
+					const fullUrl = startString + endString;
+					console.log("FULL URL: " + fullUrl);  // Print the final constructed URL
+					return fullUrl;
+					break;  // Exit the loop after finding and processing the matching camera
+				}
+			}
+
+	}
+
+	function returnURL(deviceInfo, format)
+	{
+		// Load the camera information from a JSON file
+		// fs.readFile('cameras.json', 'utf8', (err, data) => {
+		// 	if (err) throw err;
+			
+		// 	const cameras = JSON.parse(data);  // Parse JSON data into the cameras array
+
+		let imageUrlTemplate = format;  // Get the image URL template from the matched camera entry
+
+		// Remove the entire URL template string from the template to get the base part of the URL
+		let endString = imageUrlTemplate.replace(
+			/http:\/\/\{\{#username\}\}\{\{username\}\}\{\{#password\}\}:\{\{password\}\}\{\{\/\}\}@\{\{\/\}\}\{\{host\}\}\{\{#port\}\}:\{\{port\}\}\{\{\/\}\}/, 
+			""
+		);
+
+		// Determine the start of the URL based on the available device information
+		let startString = "";
+
+		if (deviceInfo.username && deviceInfo.password && deviceInfo.port) {
+			// All username, password, and port are provided
+			startString = `http://${deviceInfo.username}:${deviceInfo.password}@${deviceInfo.host}:${deviceInfo.port}`;
+		} else if (deviceInfo.username && deviceInfo.password && !deviceInfo.port) {
+			// Username and password are provided, but no port
+			startString = `http://${deviceInfo.username}:${deviceInfo.password}@${deviceInfo.host}`;
+		} else if (!deviceInfo.username && !deviceInfo.password && deviceInfo.port) {
+			// Only the port is provided
+			startString = `http://${deviceInfo.host}:${deviceInfo.port}`;
+		} else if (deviceInfo.username && !deviceInfo.password && deviceInfo.port) {
+			// Username and port are provided, but no password
+			startString = `http://${deviceInfo.username}@${deviceInfo.host}:${deviceInfo.port}`;
+		} else if (deviceInfo.username && !deviceInfo.password && !deviceInfo.port) {
+			// Only the username is provided
+			startString = `http://${deviceInfo.username}@${deviceInfo.host}`;
+		} else if (!deviceInfo.username && !deviceInfo.password && !deviceInfo.port) {
+			// Neither username, password, nor port is provided
+			startString = `http://${deviceInfo.host}`;
+		}
+
+		// Replace placeholders in the remaining template (endString) with actual values
+		endString = endString.replace(/\{\{username\}\}/g, deviceInfo.username || "");
+		endString = endString.replace(/(\{\{#password\}\})?\{\{password\}\}/g, deviceInfo.password || "");
+		endString = endString.replace(/\{\{\/\}\}/g, "");
+
+		// Combine the start and end strings to form the full URL
+		const fullUrl = startString + endString;
+		console.log("FULL URL: " + fullUrl);  // Print the final constructed URL
+		return fullUrl;
+			}
 
 </script>
 
