@@ -12,7 +12,6 @@
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
   <script>
 
-
 	// Reads camera vendor and model data and parses into a dict for easier use later
 	async function parseVendorData()
 	{
@@ -608,6 +607,7 @@
 		);
 	}
 
+	// Unused, use returnURL instead
 	async function getURL(deviceInfo)
 	{
 		const fs = require('fs');
@@ -684,11 +684,22 @@
 
 	}
 
+	// Takes in a deviceInfo object and the desired format, fills the format with the deviceInfo contents
 	function returnURL(deviceInfo, format)
 	{
 		// Load the camera information from a JSON file
 		// fs.readFile('cameras.json', 'utf8', (err, data) => {
 		// 	if (err) throw err;
+
+		// Example device information object
+		const deviceInfoTemplate = {
+			vendor: "Zavio",  // Vendor name
+			model: "F1100",   // Model name
+			username: "admin",  // Username for authentication
+			password: "admin",  // Password for authentication
+			host: "192.168.0.55",  // Host IP address
+			port: null  // Port is not provided (null indicates no port)
+		};
 			
 		// 	const cameras = JSON.parse(data);  // Parse JSON data into the cameras array
 
@@ -732,7 +743,7 @@
 		const fullUrl = startString + endString;
 		console.log("FULL URL: " + fullUrl);  // Print the final constructed URL
 		return fullUrl;
-			}
+	}
 
 </script>
 
