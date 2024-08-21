@@ -114,7 +114,7 @@
 			<div class="header">
 				<button class="cancel" onClick="showCamView()">&#x2715;</button>
 				<span>Add New Camera</span>
-				<button class="save" onClick="addCamera()">&#x2713;</button>
+				<!-- <button class="save" onClick="addCamera()">&#x2713;</button> -->
 			</div>
 			<form class="form" id="addForm">
 				<div class="addFormField"><label for="nameAdd">Name:</label><input id="nameAdd" placeholder="The name of your camera"></input></div>
@@ -160,8 +160,6 @@
 				form.addEventListener('submit', (e)=> 
 				{
 					let messages = [];
-					console.log(addVendor.value);
-					console.log(addModel.value);
 					if(addVendor.value == null || addVendor.value == "select")
 					{
 						messages.push("Please select a vendor and model");
@@ -174,7 +172,7 @@
 					if (messages.length > 0)
 					{
 						e.preventDefault();
-						errorElement.innerText = messages.join("\n") + addModel.value;
+						errorElement.innerText = messages.join("\n");
 					}
 					else
 					{
@@ -243,8 +241,8 @@
 			
 			<div></div>
 
-			<button onClick="deleteAllCams()">DELETE ALL CAM DATA</button>
-			<button onClick="lastIndex()">Go to last index</button>
+			<!-- <button onClick="deleteAllCams()">DELETE ALL CAM DATA</button>
+			<button onClick="lastIndex()">Go to last index</button> -->
 			
 				<script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
 		</div>
@@ -419,13 +417,13 @@
 		);
 	}
 
+	
+
 	// Delete a camera from app data given an id
-	function deleteCamera(camId)
+	async function deleteCamera(camId)
 	{
 		buildfire.appData.delete(camId, "camInfo", (err, result) => {
 		if (err) return console.error(err);
-
-		console.log("Record deleted");
 
 		loadCameras();
 		showCamView();
@@ -452,15 +450,18 @@
 			for(let i = 0; i < result.length; i++)
 			{
 				swiper.appendSlide([
-				`<div class="swiper-slide" id = "` + result[i]["id"] + `"><img id="image" src="` + result[i]["data"]["filledImgUrl"]
-					 + `"><span>`+ result[i]["data"]["name"] + `</span></div>`,
+				`<div class="swiper-slide" id = "` + result[i]["id"] + `"><img id="loading" src="images/Spin.gif"><img id="image" src="` 
+				+ result[i]["data"]["filledImgUrl"]
+				+ `"><span id="camName">`
+				+ result[i]["data"]["name"] 
+				+ `</span><div id="desc"></div></div>`,
 				]);		
 			}
 
 			if(result.length <= 0)
 			{
 				swiper.appendSlide([
-				'<div class="swiper-slide" id=""><img src="images/Solid_black.png"><span>No Cameras Found</span></div>',
+				'<div class="swiper-slide" id=""><div id="desc">No cameras configured. Please add a camera by pressing the add camera button in the top right.</div></div>',
 				]);	
 			}
 			showCamView();
@@ -503,7 +504,7 @@
 	}
 
 	// Fills the edit form with values from the camera at the current swiper index
-	async function fillForm()
+	function fillForm()
 	{
 		if(document.getElementsByClassName("swiper-slide-active")[0].id == ""){ return false }
 		document.getElementById("camId").innerHTML = "" + document.getElementsByClassName("swiper-slide-active")[0].id;
@@ -524,9 +525,10 @@
 			document.getElementById('editImgUrl').innerText = result.data.imgUrl; 
 			document.getElementById('editType').innerText = result.data.type;
 			document.getElementById('editFilledUrl').innerText = result.data.filledImgUrl;
-			return true;
+			
 		}
 		);
+		return true;
 		
 	}
 
@@ -559,7 +561,7 @@
 
 	// Updates the active camera every second
 	setInterval(function() {
-		refreshCachedImage(swiper.slides[swiper.activeIndex].getElementsByTagName("img")[0]);
+		refreshCachedImage(swiper.slides[swiper.activeIndex].getElementsByTagName("img")[1]);
 	}, 1000);
 
 	// Refreshes the image of active swiper index
@@ -572,17 +574,17 @@
 			return;
 		} else {
 			console.error('Image does not exists.');
-			imgElement.src = "images/Solid_black.png";
+			imgElement.src = "";
 			return;
 		}
 		});
 	};
 
-	async function reloadImg(url) {
-	await fetch(url, { cache: 'reload', mode: 'no-cors' })
-	document.body.querySelectorAll(`img[src='${url}']`)
-		.forEach(img => img.src = url)
-	}
+	// async function reloadImg(url) {
+	// await fetch(url, { cache: 'reload', mode: 'no-cors' })
+	// document.body.querySelectorAll(`img[src='${url}']`)
+	// 	.forEach(img => img.src = url)
+	// }
 
 	// CHECK IF IMAGE EXISTS
 	function checkIfImageExists(url, callback) {
