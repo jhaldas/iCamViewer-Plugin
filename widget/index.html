@@ -114,7 +114,7 @@
 			<div class="header">
 				<button class="cancel" onClick="showCamView()">&#x2715;</button>
 				<span>Add New Camera</span>
-				<button class="save" onClick="addCamera()">&#x2713;</button>
+				<!-- <button class="save" onClick="addCamera()">&#x2713;</button> -->
 			</div>
 			<form class="form" id="addForm">
 				<div class="addFormField"><label for="nameAdd">Name:</label><input id="nameAdd" placeholder="The name of your camera"></input></div>
@@ -143,38 +143,45 @@
 							<option value="select"></option>
 						</select>
 				</div>				
-				<button onClick='addCamera()' style="font-size:medium; width: 100%; padding:10px; border:none; background:none; color:grey;">Add Camera</button>
+				<button type="submit" style="font-size:medium; width: 100%; padding:10px; border:none; background:none; color:grey;">Add Camera</button>
 			</form>
-			<div id="imgUrl" style="color:white"></div>
-			<div id="type" style="color:white"></div>
+			<div hidden id="imgUrl" style="color:white"></div>
+			<div hidden id="type" style="color:white"></div>
 
 			<!-- Form Validation -->
-			<!-- <div id="error" style="color:red">Error:</div> -->
-			<!-- <script>
+			<div id="error" style="color:red"></div>
+			<script>
 
 				const addVendor = document.getElementById('vendorsAdd');
 				const addModel = document.getElementById('modelsAdd');
 				const form = document.getElementById('addForm');
+				const errorElement = document.getElementById('error');
 
 				form.addEventListener('submit', (e)=> 
 				{
 					let messages = [];
-					if(addVendor.value == null || addVendor == "-- select one --")
+					if(addVendor.value == null || addVendor.value == "select")
 					{
-						messages.push("Vendor is required");
+						messages.push("Please select a vendor and model");
 					}
-					else if(addModel.value == null || addModel == "-- select one --")
+					else if(addModel.value == null || addModel.value == "" || addModel.value == "select")
 					{
-						messages.push("Model is required");
+						messages.push("Please select a model");
 					}
 					
-					if (messages.length >= 0)
+					if (messages.length > 0)
 					{
 						e.preventDefault();
+						errorElement.innerText = messages.join("\n");
 					}
+					else
+					{
+						addCamera();
+					}
+
 				})
 
-			</script> -->
+			</script>
 		</div>
 
 		<!-- Edit camera screen -->
@@ -184,7 +191,7 @@
 				<span>Update Configuration</span>
 				<button class="save" onClick='updateCamera(document.getElementById("camId").innerHTML, document.getElementById("camIndex").innerHTML)'>&#x2713;</button>
 			</div>
-			<div id="camId" style="color:white"></div>
+			<div hidden id="camId" style="color:white"></div>
 			<div id="camIndex" style="display:none"></div>
 			<form class="form" id="editForm">
 				<div class="editFormField"><label for="name">Name:</label><input id="name" placeholder="The name of your camera"></input></div>
@@ -196,9 +203,9 @@
 				<div class="editFormField"><label for="modelEdit">Model: </label><input id="model" style="color:grey" readonly></input></div>				
 				<button onClick='deleteCamera(document.getElementById("camId").innerHTML)' style="font-size:medium; width: 100%; padding:10px; border:none; background:none; color:white;">Delete this Camera</button>
 			</form>
-			<div id="editImgUrl" style="color:white"></div>
-			<div id="editType" style="color:white"></div>
-			<div id="editFilledUrl" style="color:white"></div>
+			<div hidden id="editImgUrl" style="color:white"></div>
+			<div hidden id="editType" style="color:white"></div>
+			<div hidden id="editFilledUrl" style="color:white"></div>
 		</div>
 
 		<!-- Camera viewing screen -->
@@ -231,9 +238,12 @@
 				<!-- If we need scrollbar -->
 				<!-- <div class="swiper-scrollbar"></div> -->
 			</div>
+			
+			<div></div>
 
-			<button onClick="deleteAllCams()">DELETE ALL CAM DATA</button>
-			<button onClick="lastIndex()">Go to last index</button>
+			<!-- <button onClick="deleteAllCams()">DELETE ALL CAM DATA</button>
+			<button onClick="lastIndex()">Go to last index</button> -->
+			
 				<script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
 		</div>
 	</div>
@@ -285,9 +295,12 @@
 
 	function showEditCamView()
 	{
+		if(!fillForm())
+		{
+			return;
+		}
 		hideAllViews();
 		editCamView.style.display ="block";
-		fillForm();
 	}
 
 	function hideEditCamView()
@@ -404,13 +417,13 @@
 		);
 	}
 
+	
+
 	// Delete a camera from app data given an id
-	function deleteCamera(camId)
+	async function deleteCamera(camId)
 	{
 		buildfire.appData.delete(camId, "camInfo", (err, result) => {
 		if (err) return console.error(err);
-
-		console.log("Record deleted");
 
 		loadCameras();
 		showCamView();
@@ -437,15 +450,18 @@
 			for(let i = 0; i < result.length; i++)
 			{
 				swiper.appendSlide([
-				`<div class="swiper-slide" id = "` + result[i]["id"] + `"><img width="400" height="400" id="image" src="` + result[i]["data"]["filledImgUrl"]
-					 + `"><span>`+ result[i]["data"]["name"] + `</span></div>`,
+				`<div class="swiper-slide" id = "` + result[i]["id"] + `"><img id="loading" src="images/Spin.gif"><img id="image" src="` 
+				+ result[i]["data"]["filledImgUrl"]
+				+ `"><span id="camName">`
+				+ result[i]["data"]["name"] 
+				+ `</span><div id="desc"></div></div>`,
 				]);		
 			}
 
 			if(result.length <= 0)
 			{
 				swiper.appendSlide([
-				'<div class="swiper-slide"><img width="400" height="400" src="images/Solid_black.png"><span>No Cameras Found</span></div>',
+				'<div class="swiper-slide" id=""><div id="desc">No cameras configured. Please add a camera by pressing the add camera button in the top right.</div></div>',
 				]);	
 			}
 			showCamView();
@@ -488,8 +504,9 @@
 	}
 
 	// Fills the edit form with values from the camera at the current swiper index
-	function fillForm(indexId)
+	function fillForm()
 	{
+		if(document.getElementsByClassName("swiper-slide-active")[0].id == ""){ return false }
 		document.getElementById("camId").innerHTML = "" + document.getElementsByClassName("swiper-slide-active")[0].id;
 		document.getElementById("camIndex").innerHTML = "" + swiper.activeIndex;
 		buildfire.appData.getById(
@@ -508,8 +525,11 @@
 			document.getElementById('editImgUrl').innerText = result.data.imgUrl; 
 			document.getElementById('editType').innerText = result.data.type;
 			document.getElementById('editFilledUrl').innerText = result.data.filledImgUrl;
+			
 		}
 		);
+		return true;
+		
 	}
 
 	// Clears add camera form
@@ -541,7 +561,7 @@
 
 	// Updates the active camera every second
 	setInterval(function() {
-		refreshCachedImage(swiper.slides[swiper.activeIndex].getElementsByTagName("img")[0]);
+		refreshCachedImage(swiper.slides[swiper.activeIndex].getElementsByTagName("img")[1]);
 	}, 1000);
 
 	// Refreshes the image of active swiper index
@@ -554,17 +574,17 @@
 			return;
 		} else {
 			console.error('Image does not exists.');
-			imgElement.src = "../widget/images/Solid_black.png";
+			imgElement.src = "";
 			return;
 		}
 		});
 	};
 
-	async function reloadImg(url) {
-	await fetch(url, { cache: 'reload', mode: 'no-cors' })
-	document.body.querySelectorAll(`img[src='${url}']`)
-		.forEach(img => img.src = url)
-	}
+	// async function reloadImg(url) {
+	// await fetch(url, { cache: 'reload', mode: 'no-cors' })
+	// document.body.querySelectorAll(`img[src='${url}']`)
+	// 	.forEach(img => img.src = url)
+	// }
 
 	// CHECK IF IMAGE EXISTS
 	function checkIfImageExists(url, callback) {
