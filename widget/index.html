@@ -202,7 +202,7 @@
 				<div class="editFormField"><label for="password">Password: </label><input id="password" placeholder="The password to log in to the camera" type="password"></input></div>
 				<div class="editFormField"><label for="vendor">Vendor: </label><input id="vendor" style="color:grey" readonly></input></div>
 				<div class="editFormField"><label for="modelEdit">Model: </label><input id="model" style="color:grey" readonly></input></div>				
-				<button onClick='deleteCamera(document.getElementById("camId").innerHTML)' style="font-size:medium; width: 100%; padding:10px; border:none; background:none; color:white;">Delete this Camera</button>
+				<button onClick='deleteCamFromData(document.getElementById("camIndex").innerHTML)' style="font-size:medium; width: 100%; padding:10px; border:none; background:none; color:white;">Delete this Camera</button>
 			</form>
 			<div hidden id="editImgUrl" style="color:white"></div>
 			<div hidden id="editType" style="color:white"></div>
@@ -211,10 +211,10 @@
 
 		<!-- Camera viewing screen -->
 		<div id="iCamView">
-			<button onClick="deleteAllCams()">DELETE ALL CAM DATA</button>
+			<!-- <button onClick="deleteAllCams()">DELETE ALL CAM DATA</button>
 			<button onClick="readCamData()">Read cam Data</button>
-			<button onClick="writeCamData()">Write cam Data</button>
-			<p id="jsonOutput" style="color:white">Filler</p>
+			<button onClick="writeCamData()">Write cam Data</button> -->
+			<!-- <p id="jsonOutput" style="color:white">Filler</p> -->
 			<div class="header">
 				<button class="cancel" onClick="showEditCamView()">&#9881;</button>
 				<span>Cameras</span>
@@ -372,7 +372,7 @@
 		camProperties["filledImgUrl"] = returnURL(camProperties, document.getElementById("imgUrl").innerText);
 
 		addCamToData(camProperties);
-		loadCameras(swiper.slides.length);
+		loadCameras(-1);
 		clearAddForm();
 
 		// // Insert data into buildfire app data
@@ -413,38 +413,47 @@
 
 		camProperties["filledImgUrl"] = returnURL(camProperties, document.getElementById("editImgUrl").innerText);
 
-		buildfire.appData.update(
-			camId,
-			camProperties,
-			"camInfo",
-			(err, result) => {
-				if (err) return console.error("Error while inserting your data", err);
+		buildfire.services.fileSystem.fileManager.readFileAsText(
+		{ path: "/data/", fileName: "camData.json" },
+		(err, fileContent) => {
+			if (err) return console.error(err);
 
-			console.log("Update successful", result);
+			console.log("File content", fileContent);
+			var jsonResult = JSON.parse(fileContent);
+			jsonResult["cams"][camIndex] = camProperties;
+			
+			buildfire.services.fileSystem.fileManager.writeFileAsText(
+			{
+				path: "/data/",
+				fileName: "camData.json",
+				content: JSON.stringify(jsonResult),
+			},
+			(err, isWritten) => {
+				if (err) return console.error(err);
 
-			loadCameras(camIndex);
-			showCamView();
+				console.log("File is written");
+				loadCameras(camIndex);
+				showCamView();
 			}
+			);
+		}
 		);
 	}
 
 	
 
 	// Delete a camera from app data given an id
-	async function deleteCamera(camId)
+	async function deleteCamera(index)
 	{
-		buildfire.appData.delete(camId, "camInfo", (err, result) => {
-		if (err) return console.error(err);
-
+		deleteCamFromData(index);
 		loadCameras();
 		showCamView();
-		});
+		swiper.slideTo(index-1);
 	}
 
 	//  Reloads all cameras in swiper using app data, displays a black image if none are found, takes an optional index as argument to show desired camera.
 	function loadCameras(indexToShow)
 	{
-		indexToShow = typeof indexToShow !== "undefined" ? indexToShow : 0;
 
 		document.getElementsByClassName('swiper-wrapper')[0].innerHTML = "";
 
@@ -476,44 +485,21 @@
 				]);	
 			}
 			showCamView();
-			swiper.slideTo(indexToShow);
-
+			if(indexToShow == -1)
+			{
+				swiper.slideTo(jsonResult["cams"].length-1);
+			}
+			else if(indexToShow === undefined)
+			{
+				swiper.slideTo(0);
+			}
+			else
+			{
+				swiper.slideTo(indexToShow);
+			}
+			
 		}
 		);
-
-		
-
-		// buildfire.appData.search(
-		// {
-		// 	filter: {
-		// 	},
-		// 	limit: 20,
-		// },
-		// "camInfo",
-		// (err, result) => {
-		// 	if (err) return console.error("there was a problem retrieving your data");
-
-		// 	for(let i = 0; i < result.length; i++)
-		// 	{
-		// 		swiper.appendSlide([
-		// 		`<div class="swiper-slide" id = "` + result[i]["id"] + `"><img id="loading" src="images/Spin.gif"><img id="image" src="` 
-		// 		+ result[i]["data"]["filledImgUrl"]
-		// 		+ `"><span id="camName">`
-		// 		+ result[i]["data"]["name"] 
-		// 		+ `</span><div id="desc"></div></div>`,
-		// 		]);		
-		// 	}
-
-		// 	if(result.length <= 0)
-		// 	{
-		// 		swiper.appendSlide([
-		// 		'<div class="swiper-slide" id=""><div id="desc">No cameras configured. Please add a camera by pressing the add camera button in the top right.</div></div>',
-		// 		]);	
-		// 	}
-		// 	showCamView();
-		// 	swiper.slideTo(indexToShow);
-		// }
-		// );
 	}
 
 	// Goes to last camera index
@@ -544,28 +530,54 @@
 	function fillForm()
 	{
 		if(document.getElementsByClassName("swiper-slide-active")[0].id == ""){ return false }
-		document.getElementById("camId").innerHTML = "" + document.getElementsByClassName("swiper-slide-active")[0].id;
+		// document.getElementById("camId").innerHTML = "" + document.getElementsByClassName("swiper-slide-active")[0].id;
 		document.getElementById("camIndex").innerHTML = "" + swiper.activeIndex;
-		buildfire.appData.getById(
-		document.getElementsByClassName("swiper-slide-active")[0].id,
-		"camInfo",
-		(err, result) => {
-			if (err) return console.error("Error while retrieving your data", err);
-			console.log("Object: ", result.data);
-			document.getElementsByClassName('editFormField')[0].getElementsByTagName('input')[0].value = result.data.name; 
-			document.getElementsByClassName('editFormField')[1].getElementsByTagName('input')[0].value = result.data.host;
-			document.getElementsByClassName('editFormField')[2].getElementsByTagName('input')[0].value = result.data.port; 
-			document.getElementsByClassName('editFormField')[3].getElementsByTagName('input')[0].value = result.data.username; 
-			document.getElementsByClassName('editFormField')[4].getElementsByTagName('input')[0].value = result.data.password; 
-			document.getElementsByClassName('editFormField')[5].getElementsByTagName('input')[0].value = result.data.vendor; 
-			document.getElementsByClassName('editFormField')[6].getElementsByTagName('input')[0].value = result.data.model;
-			document.getElementById('editImgUrl').innerText = result.data.imgUrl; 
-			document.getElementById('editType').innerText = result.data.type;
-			document.getElementById('editFilledUrl').innerText = result.data.filledImgUrl;
+
+		buildfire.services.fileSystem.fileManager.readFileAsText(
+		{ path: "/data/", fileName: "camData.json" },
+		(err, fileContent) => {
+			if (err) return console.error(err);
+
+			var currIndex = document.getElementsByClassName("swiper-slide-active")[0].id;
+
+			jsonResult = JSON.parse(fileContent);
 			
+			document.getElementsByClassName('editFormField')[0].getElementsByTagName('input')[0].value = jsonResult["cams"][currIndex].name; 
+			document.getElementsByClassName('editFormField')[1].getElementsByTagName('input')[0].value = jsonResult["cams"][currIndex].host;
+			document.getElementsByClassName('editFormField')[2].getElementsByTagName('input')[0].value = jsonResult["cams"][currIndex].port; 
+			document.getElementsByClassName('editFormField')[3].getElementsByTagName('input')[0].value = jsonResult["cams"][currIndex].username; 
+			document.getElementsByClassName('editFormField')[4].getElementsByTagName('input')[0].value = jsonResult["cams"][currIndex].password; 
+			document.getElementsByClassName('editFormField')[5].getElementsByTagName('input')[0].value = jsonResult["cams"][currIndex].vendor; 
+			document.getElementsByClassName('editFormField')[6].getElementsByTagName('input')[0].value = jsonResult["cams"][currIndex].model;
+			document.getElementById('editImgUrl').innerText = jsonResult["cams"][currIndex].imgUrl; 
+			document.getElementById('editType').innerText = jsonResult["cams"][currIndex].type;
+			document.getElementById('editFilledUrl').innerText = jsonResult["cams"][currIndex].filledImgUrl;
 		}
 		);
+
 		return true;
+
+
+		// buildfire.appData.getById(
+		// document.getElementsByClassName("swiper-slide-active")[0].id,
+		// "camInfo",
+		// (err, result) => {
+		// 	if (err) return console.error("Error while retrieving your data", err);
+		// 	console.log("Object: ", result.data);
+		// 	document.getElementsByClassName('editFormField')[0].getElementsByTagName('input')[0].value = result.data.name; 
+		// 	document.getElementsByClassName('editFormField')[1].getElementsByTagName('input')[0].value = result.data.host;
+		// 	document.getElementsByClassName('editFormField')[2].getElementsByTagName('input')[0].value = result.data.port; 
+		// 	document.getElementsByClassName('editFormField')[3].getElementsByTagName('input')[0].value = result.data.username; 
+		// 	document.getElementsByClassName('editFormField')[4].getElementsByTagName('input')[0].value = result.data.password; 
+		// 	document.getElementsByClassName('editFormField')[5].getElementsByTagName('input')[0].value = result.data.vendor; 
+		// 	document.getElementsByClassName('editFormField')[6].getElementsByTagName('input')[0].value = result.data.model;
+		// 	document.getElementById('editImgUrl').innerText = result.data.imgUrl; 
+		// 	document.getElementById('editType').innerText = result.data.type;
+		// 	document.getElementById('editFilledUrl').innerText = result.data.filledImgUrl;
+			
+		// }
+		// );
+		// return true;
 		
 	}
 
@@ -611,7 +623,7 @@
 			return;
 		} else {
 			console.error('Image does not exists.');
-			imgElement.src = "";
+			imgElement.src = "images/CameraNotFound.png";
 			return;
 		}
 		});
