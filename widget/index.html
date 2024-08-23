@@ -277,7 +277,8 @@
 	// Displays cam view
 	function showCamView()
 	{
-		hideAllViews();
+		addCamView.style.display = "none";
+		editCamView.style.display = "none";
 		iCamView.style.display = "block";
 	}
 
@@ -351,7 +352,7 @@
 	});
 
 	// Adds a camera to the app data database from the add camera form
-	function addCamera(camName)
+	function addCamera()
 	{
 		// Grab camera properties from add form
 		let camProperties = 
@@ -373,6 +374,7 @@
 
 		addCamToData(camProperties);
 		loadCameras(-1);
+		swiper.slideTo(swiper.length-1, 1000);
 		clearAddForm();
 
 		// // Insert data into buildfire app data
@@ -487,15 +489,15 @@
 			showCamView();
 			if(indexToShow == -1)
 			{
-				swiper.slideTo(jsonResult["cams"].length-1);
+				swiper.slideTo(jsonResult["cams"].length-1, 500);
 			}
 			else if(indexToShow === undefined)
 			{
-				swiper.slideTo(0);
+				swiper.slideTo(0, 500);
 			}
 			else
 			{
-				swiper.slideTo(indexToShow);
+				swiper.slideTo(indexToShow, 500);
 			}
 			
 		}
@@ -611,7 +613,7 @@
 	// Updates the active camera every second
 	setInterval(function() {
 		refreshCachedImage(swiper.slides[swiper.activeIndex].getElementsByTagName("img")[1]);
-	}, 1000);
+	}, 250);
 
 	// Refreshes the image of active swiper index
 	function refreshCachedImage(imgElement) {
