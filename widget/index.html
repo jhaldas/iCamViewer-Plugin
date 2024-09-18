@@ -12,6 +12,8 @@
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
   <script>
 
+	const frameRate = 1000; // Milliseconds
+
 	// Reads camera vendor and model data and parses into a dict for easier use later
 	async function parseVendorData()
 	{
@@ -613,7 +615,7 @@
 	// Updates the active camera every second
 	setInterval(function() {
 		refreshCachedImage(swiper.slides[swiper.activeIndex].getElementsByTagName("img")[1]);
-	}, 250);
+	}, frameRate);
 
 	// Refreshes the image of active swiper index
 	function refreshCachedImage(imgElement) {
@@ -621,11 +623,11 @@
 		checkIfImageExists(imgElement.src, (exists) => {
 		if (exists) {
 			console.log('Image exists. ')
-			imgElement.src = imgElement.src + "?" + Math.random();
+			imgElement.src = imgElement.src + "?" + Math.random(); // Hash breaking image
 			return;
 		} else {
 			console.error('Image does not exists.');
-			imgElement.src = "images/CameraNotFound.png";
+			//imgElement.src = "images/CameraNotFound.png";
 			return;
 		}
 		});
