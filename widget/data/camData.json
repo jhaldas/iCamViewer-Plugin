@@ -1,0 +1,8 @@
+{
+    "cams" : 
+        [   
+            {"id":"123456", "name" : "cam1", "username":"admin", "password":"admin"},
+            {"id":"567890", "name" : "cam2", "username":"admin", "password":"admin"},
+            {"id":"123521", "name" : "cam3", "username":"admin", "password":"admin"}
+        ]
+}
