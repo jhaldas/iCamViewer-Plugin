@@ -213,9 +213,9 @@
 
 		<!-- Camera viewing screen -->
 		<div id="iCamView">
-			<!-- <button onClick="deleteAllCams()">DELETE ALL CAM DATA</button>
-			<button onClick="readCamData()">Read cam Data</button>
-			<button onClick="writeCamData()">Write cam Data</button> -->
+			<!-- <button onClick="deleteAllCams()">DELETE ALL CAM DATA</button> -->
+			<!-- <button onClick="readCamData()">Read cam Data</button> -->
+			<!-- <button onClick="writeCamData()">Write cam Data</button>  -->
 			<!-- <p id="jsonOutput" style="color:white">Filler</p> -->
 			<div class="header">
 				<button class="cancel" onClick="showEditCamView()">&#9881;</button>
@@ -326,6 +326,8 @@
 
 	// Load cameras on startup
 	window.onload = loadCameras();
+
+	isFirstTimeStartup();
 
 	// Initialize swiper for camera display
 	const swiper = new Swiper('.swiper', {
@@ -526,8 +528,52 @@
 				if (err) return console.error(err);
 
 				console.log("File is written");
-				loadCameras();
 			});
+	}
+
+	// Deletes all cameras in app data
+	function initializeCamJSON()
+	{
+		buildfire.services.fileSystem.fileManager.writeFileAsText(
+			{
+				path: "/data/",
+				fileName: "camData.json",
+				content: `{"initFlag":"1", "cams":[]}`,
+			},
+			(err, isWritten) => {
+				if (err) return console.error(err);
+
+				console.log("File is written");
+			});
+	}
+
+	// Run to check if users have initialized cameras yet or not.
+	function isFirstTimeStartup()
+	{
+		buildfire.services.fileSystem.fileManager.readFileAsText(
+		{ path: "/data/", fileName: "camData.json" },
+		(err, fileContent) => {
+			if (err) 
+			{
+				initializeCamJSON();	
+				return 1;
+			}
+			try
+			{
+				jsonResult = JSON.parse(fileContent);
+				if(jsonResult["initFlag"] == "1")
+				{
+					return 0;
+				}
+				return 1;
+			}catch(error)
+			{
+				initializeCamJSON();
+				return 1;
+			}
+			
+		}
+		);
 	}
 
 	// Fills the edit form with values from the camera at the current swiper index
